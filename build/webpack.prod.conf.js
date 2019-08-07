@@ -6,21 +6,20 @@ const config = require('../config');
 const merge = require('webpack-merge');
 const baseWebpackConfig = require('./webpack.base.conf');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const env = process.env.NODE_ENV === 'production_testing'
   ? require('../config/prod.test.env')
   : require('../config/prod.env');
 const isPro = process.env.NODE_ENV === 'production';
 var entrise = [];
-Object.keys(baseWebpackConfig.entry).forEach(function (name) {
-  if (name.indexOf('lib/vendor') < 0 && name.indexOf('lib/vendorStyle') < 0 && name.indexOf('vendor') < 0) {
-    entrise.push(name); //过滤后报错，js排列顺序出错
-  }
-});
+// Object.keys(baseWebpackConfig.entry).forEach(function (name) {
+//   if (name.indexOf('lib/vendor') < 0 && name.indexOf('lib/vendorStyle') < 0 && name.indexOf('vendor') < 0) {
+//     entrise.push(name); //过滤后报错，js排列顺序出错
+//   }
+// });
 const webpackConfig = merge(baseWebpackConfig, {
   mode: 'production',
   module: {
@@ -33,35 +32,73 @@ const webpackConfig = merge(baseWebpackConfig, {
   devtool: config.build.productionSourceMap ? config.build.devtool : false,
   output: {
     path: config.build.assetsRoot,
-    filename: utils.assetsPath('js/[name].[chunkhash].js'),
-    chunkFilename: utils.assetsPath('js/[id].[chunkhash].js')
+    filename: utils.assetsPath('js/[name].[chunkhash].js')
+    // chunkFilename: utils.assetsPath('js/[id].[chunkhash].js') // chunkFilename 影响到filename 设置chunkFilename后会覆盖掉filename，直接用chunkFilename形式命名
+  },
+  optimization: {
+    minimizer: [
+      new UglifyJsPlugin({
+        uglifyOptions: {
+          warnings: false,
+          compress: {
+            drop_debugger: true,
+            drop_console: isPro
+          },
+          sourceMap: config.build.productionSourceMap,
+          parallel: true
+        }
+      }),
+      new OptimizeCSSPlugin({
+        assetNameRegExp: /\.css$/g,
+        cssProcessor: require('cssnano'),
+        cssProcessorOptions: config.build.productionSourceMap
+          ? { safe: true, map: { inline: false } }
+          : { safe: true }
+      })
+    ],
+    splitChunks: {
+      chunks: 'all',
+      minSize: 0,
+      cacheGroups:{
+        vendors: {
+          name: 'vendors',
+          test: /[\/]node_modules[\/]/,
+          priority: -10
+        },
+        default: {
+          name: 'common',
+          minChunks: 2,
+          priority: -20,
+          reuseExistingChunk: true
+        }
+      }
+    },
+    runtimeChunk: {
+      name: 'runtime'
+    }
   },
   plugins: [
     // http://vuejs.github.io/vue-loader/en/workflow/production.html
     new webpack.DefinePlugin({
-      'process.env': env,
-      'serverDomain': isPro ? config.build.serverDomain : config.dev.serverDomain,
-      'domain': isPro ? config.build.domain : config.dev.domain,
-      'orderDomain': isPro ? config.build.orderDomain : config.dev.orderDomain,
-      'idfDomain': isPro ? config.build.idfDomain : config.dev.idfDomain
+
     }),
 
     // extract css into its own file
-    new ExtractTextPlugin({
+    new MiniCssExtractPlugin({
       filename: utils.assetsPath('css/[name].[contenthash].css'),
       // Setting the following option to `false` will not extract CSS from codesplit chunks.
       // Their CSS will instead be inserted dynamically with style-loader when the codesplit chunk has been loaded by webpack.
       // It's currently set to `true` because we are seeing that sourcemaps are included in the codesplit bundle as well when it's `false`,
       // increasing file size: https://github.com/vuejs-templates/webpack/issues/1110
-      allChunks: false,
+      allChunks: false
     }),
     // Compress extracted CSS. We are using this plugin so that possible
     // duplicated CSS from different components can be deduped.
-    new OptimizeCSSPlugin({
-      cssProcessorOptions: config.build.productionSourceMap
-        ? { safe: true, map: { inline: false } }
-        : { safe: true }
-    }),
+    // new OptimizeCSSPlugin({
+    //   cssProcessorOptions: config.build.productionSourceMap
+    //     ? {safe: true, map: {inline: false}}
+    //     : {safe: true}
+    // }),
     // generate dist index.html with correct asset hash for caching.
     // you can customize output by editing /index.html
     // see https://github.com/ampedandwired/html-webpack-plugin
@@ -84,45 +121,7 @@ const webpackConfig = merge(baseWebpackConfig, {
     // keep module.id stable when vendor modules does not change
     new webpack.HashedModuleIdsPlugin(),
     // enable scope hoisting
-    new webpack.optimize.ModuleConcatenationPlugin(),
-    // split vendor js into its own file
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'vendor',
-      minChunks(module) {
-        // any required modules inside node_modules are extracted to vendor
-        return (
-          module.resource &&
-          /\.js$/.test(module.resource) &&
-          (
-            module.resource.indexOf(
-              path.join(__dirname, '../node_modules')
-            ) === 0 ||
-            module.resource.indexOf(
-              path.join(__dirname, '../src/assets/js/lib')
-            ) === 0
-          )
-        );
-      }
-    }),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'common',
-      chunks: entrise,
-      minChunks: 2
-    }),
-    // This instance extracts shared chunks from code splitted chunks and bundles them
-    // in a separate chunk, similar to the vendor chunk
-    // see: https://webpack.js.org/plugins/commons-chunk-plugin/#extra-async-commons-chunk
-    new webpack.optimize.CommonsChunkPlugin({
-      async: 'async-common',
-      children: true,
-      minChunks: 2
-    }),
-    // extract webpack runtime and module manifest to its own file in order to
-    // prevent vendor hash from being updated whenever app bundle is updated
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'manifest',
-      minChunks: Infinity
-    }),
+    // new webpack.optimize.ModuleConcatenationPlugin(),
 
     // copy custom static assets
     new CopyWebpackPlugin([
@@ -131,23 +130,7 @@ const webpackConfig = merge(baseWebpackConfig, {
         to: config.build.assetsSubDirectory,
         ignore: ['.*']
       }
-    ]),
-
-    new UglifyJsPlugin({
-      uglifyOptions: {
-        output: {
-          comments: false,
-          beautify: !isPro
-        },
-        compress: {
-          warnings: !isPro,
-          drop_console: isPro,
-          pure_funcs: isPro ? ['console.log'] : []
-        }
-      },
-      sourceMap: config.build.productionSourceMap,
-      parallel: true
-    })
+    ])
   ].concat(utils.htmlPlugins())
 });
 

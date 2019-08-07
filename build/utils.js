@@ -1,13 +1,14 @@
 'use strict';
 const path = require('path');
 const config = require('../config');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const HtmlWebpackExternalsPlugin = require('html-webpack-externals-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const packageConfig = require('../package.json');
 const glob = require('glob');
 const merge = require('webpack-merge');
 
-// 获取所有入口文件(不带目录结构)
-exports.getEntryWithFold = function getEntryWithFold (globPath) {
+function getEntryWithFold (globPath) {
   var entries = {},
     basename;
   glob.sync(globPath).forEach(function (entry) {
@@ -16,39 +17,45 @@ exports.getEntryWithFold = function getEntryWithFold (globPath) {
     entries[basename] = entry;
   });
   return entries;
-};
+}
 
-// 获取所有入口文件(带目录结构)
-exports.getEntry = function getEntry (globPath, noFolder) {
+function getEntry (globPath, noFolder) {
   var entries = {},
     filesname, filesPath, entryName;
   glob.sync(globPath).forEach(function (entry) {
     let ext = path.extname(entry);
     filesname = path.basename(entry, path.extname(entry));
     if (noFolder) {
-      filesPath = path.dirname(entry).replace('./src/view/', '');
+      // filesPath = path.dirname(entry).replace('./src/view/', '');
+      entryName = filesname;
     } else {
       filesPath = path.dirname(entry).replace('./src/', '');
+      entryName = filesPath + '/' + filesname;
     }
-    entryName = filesPath + '/' + filesname;
+
     entries[entryName] = entry;
   });
   return entries;
-};
+}
+
+// 获取所有入口文件(不带目录结构)
+exports.getEntryWithFold = getEntryWithFold;
+// 获取所有入口文件(带目录结构)
+exports.getEntry = getEntry;
 
 exports.htmlPlugins = function () {
   var pages = getEntry('./src/view/**/*.html');
   var arr = [];
   for (var pathname in pages) {
     // 配置生成的html文件，定义路径等
-    let chunks = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'production_testing' ? ['manifest', 'common', 'vendor', pathname.replace(/^view\//, '')] : [pathname.replace(/^view\//, '')];
+    let chunks = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'production_testing' ? ['runtime', 'vendors', 'common',pathname.replace(/^(view\/).*\/(.*)/, '$2')] : [pathname.replace(/^(view\/).*\/(.*)/, '$2')];
     var filename = pathname.replace(/^(view\/).*\/(.*)/, '$1$2');
     var conf = {
       filename: filename + '.html',
       template: pages[pathname], // 模板路径
       inject: true, // js插入位置
       chunks: chunks,
-      chunksSortMode: 'manual', //手动
+      // chunksSortMode: 'manual', //手动
       data: {
         processEnv: process.env.NODE_ENV
       },
@@ -100,7 +107,7 @@ exports.cssLoaders = function (options) {
           spritePath: 'dist/static/img/sprites',
           retina: true
         })
-      ]``
+      ]
     }
   };
 
@@ -120,10 +127,15 @@ exports.cssLoaders = function (options) {
     // Extract CSS when that option is specified
     // (which is the case during production build)
     if (options.extract) {
-      return ExtractTextPlugin.extract({
-        use: loaders,
-        fallback: 'style-loader'
-      });
+      let extractLoader = {
+        loader: MiniCssExtractPlugin.loader,
+        options: {}
+      };
+      return [extractLoader].concat(loaders)
+      // return ExtractTextPlugin.extract({
+      //   use: loaders,
+      //   fallback: 'style-loader'
+      // });
     } else {
       return ['style-loader'].concat(loaders);
     }
