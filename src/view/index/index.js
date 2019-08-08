@@ -3,7 +3,11 @@
  */
 import 'babel-polyfill';
 import './index.scss';
-import 'assets/script/a';
+// import 'assets/script/a';
 import 'assets/script/b';
 
-console.log('hahahhah index');
+import ('../../assets/script/a').then((a) => {
+  a();
+});
+
+console.log('hahahhah index22sds');

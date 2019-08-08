@@ -23,7 +23,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
 
   // these devServer options should be customized in /config/index.js
   devServer: {
-    clientLogLevel: 'warning',
+    // clientLogLevel: 'warning',
     historyApiFallback: true,
     hot: true,
     inline: true,
@@ -45,14 +45,10 @@ const devWebpackConfig = merge(baseWebpackConfig, {
   },
   plugins: [
     new webpack.DefinePlugin({
-      'process.env': require('../config/dev.env'),
-      'domain': config.dev.domain,
-      'serverDomain': config.dev.serverDomain,
-      'orderDomain': config.dev.orderDomain,
-      'idfDomain': config.dev.idfDomain
+      // 'idfDomain': config.dev.idfDomain
     }),
     new webpack.HotModuleReplacementPlugin(),
-    // new webpack.NamedModulesPlugin(), // HMR shows correct file names in console on update.
+    new webpack.NamedModulesPlugin(), // HMR shows correct file names in console on update.
     // new webpack.NoEmitOnErrorsPlugin(),
     // https://github.com/ampedandwired/html-webpack-plugin
     // new HtmlWebpackPlugin({
@@ -70,7 +66,6 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     ])
   ].concat(utils.htmlPlugins())
 });
-
 module.exports = new Promise((resolve, reject) => {
   portfinder.basePort = process.env.PORT || config.dev.port;
   portfinder.getPort((err, port) => {

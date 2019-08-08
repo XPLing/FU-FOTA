@@ -1,0 +1,140 @@
+@mixin fs($px) {
+  font-size: $px + px;
+  //@media screen and (min-width: 1600px) {
+  //  font-size: $px*1.1 + px;
+  //}
+  [data-dpr="2"] & {
+    font-size: $px * 2 + px;
+  }
+  [data-dpr="3"] & {
+    font-size: $px * 3 + px;
+  }
+}
+@mixin fs_rem($px) {
+  font-size: $px/$originW + rem;
+}
+
+@mixin lh($px) {
+  line-height: $px/$originW + rem;
+}
+
+@mixin w($px) {
+  width: $px/$originW + rem;
+}
+
+@mixin h($px) {
+  height: $px/$originW + rem;
+}
+
+@mixin min-w($px) {
+  min-width: $px/$originW + rem;
+}
+
+@mixin min-h($px) {
+  min-height: $px/$originW + rem;
+}
+
+@mixin max-w($px) {
+  max-width: $px/$originW + rem;
+}
+
+@mixin max-h($px) {
+  max-height: $px/$originW + rem;
+}
+
+@mixin mall1($tpx,$rpx,$bpx,$lpx) {
+  margin: $tpx/$originW +rem $rpx/$originW +rem $bpx/$originW +rem $lpx/$originW +rem;
+}
+
+@mixin mall2($tbpx,$lrpx) {
+  margin: $tbpx/$originW +rem $lrpx/$originW +rem;
+}
+
+@mixin mt($px) {
+  margin-top: $px/$originW +rem;
+}
+
+@mixin mb($px) {
+  margin-bottom: $px/$originW +rem;
+}
+
+@mixin ml($px) {
+  margin-left: $px/$originW +rem;
+}
+
+@mixin mr($px) {
+  margin-right: $px/$originW +rem;
+}
+
+@mixin pall1($tpx,$rpx,$bpx,$lpx) {
+  padding: $tpx/$originW +rem $rpx/$originW +rem $bpx/$originW +rem $lpx/$originW +rem;
+}
+
+@mixin pall2($tbpx,$lrpx) {
+  padding: $tbpx/$originW +rem $lrpx/$originW +rem;
+}
+
+@mixin pt($px) {
+  padding-top: $px/$originW +rem;
+}
+
+@mixin pb($px) {
+  padding-bottom: $px/$originW +rem;
+}
+
+@mixin pl($px) {
+  padding-left: $px/$originW +rem;
+}
+
+@mixin pr($px) {
+  padding-right: $px/$originW +rem;
+}
+
+@mixin posR($px) {
+  right: $px/$originW +rem;
+}
+
+@mixin posL($px) {
+  left: $px/$originW +rem;
+}
+
+@mixin posT($px) {
+  top: $px/$originW +rem;
+}
+
+@mixin posB($px) {
+  bottom: $px/$originW +rem;
+}
+
+@mixin ellipsis($px,$base,$unit) {
+  max-width: getSize($px, $base, $unit);
+  @extend %ellipsis;
+}
+
+@mixin bg-image-size($url, $sizeX, $sizeY) {
+  background: url($url + "@2x.png") no-repeat;
+  background-size: formatVal($sizeX, rem) formatVal($sizeY, rem);
+  @media screen and (-webkit-device-pixel-ratio: 3), screen and (min-device-pixel-ratio: 3) {
+    background: url($url + "@3x.png") no-repeat;
+    background-size: formatVal($sizeX, rem) formatVal($sizeY, rem);
+  }
+}
+
+@mixin bg-image($url, $type:false) {
+  @if $type {
+    background: url($url) no-repeat;
+    background-size: $type;
+    //@media screen and (-webkit-device-pixel-ratio: 3), screen and (min-device-pixel-ratio: 3) {
+    //  background: url($url + "@3x.png") no-repeat;
+    //  background-size: $type;
+    //}
+  } @else {
+    background-image: url($url);
+    background-repeat: no-repeat;
+    //@media screen and (-webkit-device-pixel-ratio: 3), screen and (min-device-pixel-ratio: 3) {
+    //  background-image: url($url + "@3x.png");
+    //  background-repeat: no-repeat;
+    //}
+  }
+
+}

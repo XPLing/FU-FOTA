@@ -1,0 +1,6 @@
+@function getSize($val,$base,$unit){
+    @return $val/$base+$unit;
+}
+@function formatVal($px,$unit){
+    @return $px/$originW+$unit;
+}

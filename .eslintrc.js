@@ -13,7 +13,8 @@ module.exports = {
     '_': true
   },
   env: {
-    browser: true,
+    es6: true,
+    browser: true
   },
   extends: [
     // https://github.com/standard/standard/blob/master/docs/RULES-en.md
@@ -40,11 +41,10 @@ module.exports = {
     'eqeqeq': 0,
     'one-var': 0,
     // 禁止在计算属性中对属性修改
-    'vue/no-side-effects-in-computed-properties': 'off',
     'prefer-promise-reject-errors': 'off',
     'handle-callback-err': 'off',
     'camelcase': 'off',
-    'vue/require-prop-type-constructor': 'off',
+    'no-restricted-imports': 'off',
     'no-irregular-whitespace': 'off'
   }
 };

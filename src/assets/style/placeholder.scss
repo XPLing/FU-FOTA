@@ -1,0 +1,42 @@
+%clearFix {
+    &:after{
+        content: '';
+        display: block;
+        width: 0;
+        height: 0;
+        overflow: hidden;
+        visibility: hidden;
+        clear: both;
+    }
+}
+%lineElem_middle {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+%lineElem_top {
+    display: inline-block;
+    vertical-align: top;
+}
+
+%lineElem_bottom {
+    display: inline-block;
+    vertical-align: bottom;
+}
+%lineElem_text-bottom {
+    display: inline-block;
+    vertical-align: text-bottom;
+}
+%lineElem_text-top {
+    display: inline-block;
+    vertical-align: text-top;
+}
+%lineElem_baseline {
+    display: inline-block;
+    vertical-align: baseline;
+}
+%ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

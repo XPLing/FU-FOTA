@@ -165,7 +165,6 @@ exports.styleLoaders = function (options) {
       use: loader
     });
   }
-
   return output;
 };
 
