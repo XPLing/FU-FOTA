@@ -6,8 +6,8 @@ import './index.scss';
 // import 'assets/script/a';
 import 'assets/script/b';
 
-import ('../../assets/script/a').then((a) => {
+require('../../assets/script/a',()=>{
   a();
-});
+},'')
 
 console.log('hahahhah index22sds');
