@@ -12,7 +12,8 @@ module.exports = {
     'QiniuJsSDK': true,
     'plupload': true,
     'Qiniu': true,
-    '_': true
+    '_': true,
+    '$': true
   },
   env: {
     es6: true,

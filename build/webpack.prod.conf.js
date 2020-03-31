@@ -66,7 +66,7 @@ const webpackConfig = merge(baseWebpackConfig, {
           chunks: 'all',
           name: 'vendors',
           enforce: true,
-          test: /[\\/]node_modules[\\/]/,
+          test: /[\\/]node_modules[\\/]|assets[\\/]lib/,
           priority: -10
         },
         default: {
@@ -84,7 +84,7 @@ const webpackConfig = merge(baseWebpackConfig, {
   plugins: [
     // http://vuejs.github.io/vue-loader/en/workflow/production.html
     new webpack.DefinePlugin({
-
+      'process.env': require('../config/prod.env')
     }),
 
     // extract css into its own file

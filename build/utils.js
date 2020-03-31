@@ -7,7 +7,6 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const packageConfig = require('../package.json');
 const glob = require('glob');
 const merge = require('webpack-merge');
-
 function getEntryWithFold (globPath) {
   var entries = {},
     basename;
@@ -44,7 +43,7 @@ exports.getEntryWithFold = getEntryWithFold;
 exports.getEntry = getEntry;
 
 exports.htmlPlugins = function () {
-  var pages = getEntry('./src/view/**/*.html');
+  var pages = getEntry('./src/view/**/*.pug');
   var arr = [];
   for (var pathname in pages) {
     // 配置生成的html文件，定义路径等
@@ -63,7 +62,7 @@ exports.htmlPlugins = function () {
         removeComments: true
       }
     };
-    if (/index.html/.test(pages[pathname])) {
+    if (/index.pug/.test(pages[pathname])) {
       conf.filename = 'index.html';
     }
     if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'production_testing') {
@@ -110,6 +109,14 @@ exports.cssLoaders = function (options) {
       ]
     }
   };
+  const stleResourceLoader = {
+    loader: 'style-resources-loader',
+    options: {
+      patterns: [
+        path.join(__dirname, '../','src/assets/style/compile.scss'),
+      ]
+    }
+  };
 
   // generate loader string to be used with extract text plugin
   function generateLoaders (loader, loaderOptions) {
@@ -121,7 +128,7 @@ exports.cssLoaders = function (options) {
         options: Object.assign({}, loaderOptions, {
           sourceMap: options.sourceMap
         })
-      });
+      }, stleResourceLoader);
     }
 
     // Extract CSS when that option is specified

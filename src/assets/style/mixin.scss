@@ -1,8 +1,9 @@
 @mixin fs($px) {
   font-size: $px + px;
-  //@media screen and (min-width: 1600px) {
-  //  font-size: $px*1.1 + px;
-  //}
+  // @media screen and (min-width: 1600px) {
+  // font-size: $px*1.1 + px;
+  // }
+
   [data-dpr="2"] & {
     font-size: $px * 2 + px;
   }
