@@ -57,12 +57,16 @@ const webpackConfig = merge(baseWebpackConfig, {
       })
     ],
     splitChunks: {
+      name: true,
       chunks: 'all',
       minSize: 0,
+      minChunks: 2,
       cacheGroups:{
         vendors: {
+          chunks: 'all',
           name: 'vendors',
-          test: /[\/]node_modules[\/]/,
+          enforce: true,
+          test: /[\\/]node_modules[\\/]/,
           priority: -10
         },
         default: {

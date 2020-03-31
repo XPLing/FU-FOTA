@@ -2,8 +2,10 @@
 
 module.exports = {
   root: true,
+  parser: 'babel-eslint',
   parserOptions: {
-    parser: 'babel-eslint'
+    "ecmaVersion": 6,
+    "sourceType": "module"
   },
   globals: {
     'moxie': true,
@@ -41,6 +43,7 @@ module.exports = {
     'eqeqeq': 0,
     'one-var': 0,
     // 禁止在计算属性中对属性修改
+    'object-curly-spacing': 'off',
     'prefer-promise-reject-errors': 'off',
     'handle-callback-err': 'off',
     'camelcase': 'off',
