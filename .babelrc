@@ -17,5 +17,8 @@
   "plugins": [
     "@babel/plugin-transform-runtime",
     "@babel/plugin-syntax-dynamic-import"
+  ],
+  "ignore": [
+    "./src/assets/lib/**/*.js"
   ]
 }

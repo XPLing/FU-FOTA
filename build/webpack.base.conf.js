@@ -37,7 +37,7 @@ module.exports = {
       'api': resolve('src/api'),
       'easyui': resolve('src/assets/lib/jquery-easyui/index'),
       'jquery-easyui': resolve('src/assets/lib/jquery-easyui/jquery.easyui.min'),
-      '1i8n': resolve('src/assets/lib/jquery-i18n/jquery.i18n.properties.min')
+      '1i8n': resolve('src/assets/lib/jquery-i18n/jquery.i18n.properties')
     }
   },
   externals: {},

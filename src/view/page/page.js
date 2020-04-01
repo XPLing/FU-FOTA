@@ -3,13 +3,13 @@
  */
 import 'babel-polyfill';
 import './page.scss';
-// import 'assets/script/a';
+// import 'assets/js/a';
 
-import(/* webpackChunkName: "moduleA" */'assets/script/moduleA').then((e) => {
+import(/* webpackChunkName: "moduleA" */'assets/js/moduleA').then((e) => {
   console.log(e);
 });
 
-import(/* webpackChunkName: "moduleB" */'assets/script/moduleB').then((e) => {
+import(/* webpackChunkName: "moduleB" */'assets/js/moduleB').then((e) => {
   console.log(e);
 });
 console.log('hahahhah page');

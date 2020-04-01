@@ -7,6 +7,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const packageConfig = require('../package.json');
 const glob = require('glob');
 const merge = require('webpack-merge');
+
 function getEntryWithFold (globPath) {
   var entries = {},
     basename;
@@ -47,7 +48,7 @@ exports.htmlPlugins = function () {
   var arr = [];
   for (var pathname in pages) {
     // 配置生成的html文件，定义路径等
-    let chunks = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'production_testing' ? ['runtime', 'vendors', 'common',pathname.replace(/^(view\/).*\/(.*)/, '$2')] : [pathname.replace(/^(view\/).*\/(.*)/, '$2')];
+    let chunks = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'production_testing' ? ['runtime', 'vendors', 'common', pathname.replace(/^(view\/).*\/(.*)/, '$2')] : [pathname.replace(/^(view\/).*\/(.*)/, '$2')];
     var filename = pathname.replace(/^(view\/).*\/(.*)/, '$1$2');
     var conf = {
       filename: filename + '.html',
@@ -104,7 +105,18 @@ exports.cssLoaders = function (options) {
       plugins: [
         require('postcss-sprites')({
           spritePath: 'dist/static/img/sprites',
-          retina: true
+          retina: true,
+          filterBy: function (image) {
+            const filter = ['jquery-easyui'];
+            const dirname = path.posix.resolve(image.path);
+            const res = filter.filter(val => {
+              return dirname.indexOf(val) !== -1
+            });
+            if (res.length>0) {
+              return Promise.reject();
+            }
+            return Promise.resolve();
+          }
         })
       ]
     }
@@ -113,7 +125,7 @@ exports.cssLoaders = function (options) {
     loader: 'style-resources-loader',
     options: {
       patterns: [
-        path.join(__dirname, '../','src/assets/style/compile.scss'),
+        path.join(__dirname, '../', 'src/assets/style/compile.scss'),
       ]
     }
   };
@@ -138,7 +150,7 @@ exports.cssLoaders = function (options) {
         loader: MiniCssExtractPlugin.loader,
         options: {}
       };
-      return [extractLoader].concat(loaders)
+      return [extractLoader].concat(loaders);
       // return ExtractTextPlugin.extract({
       //   use: loaders,
       //   fallback: 'style-loader'

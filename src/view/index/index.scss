@@ -1,0 +1,27 @@
+.search-box {
+  @include h(40);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 formatVal(10,rem);
+}
+.operation-box{
+  @include h(40);
+  display: flex;
+  align-items: center;
+}
+.FOTA-tab {
+  .search-input {
+    input {
+      width: formatVal(200, rem);
+    }
+  }
+}
+.c-icon{
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  &.operate{
+    cursor: pointer;
+  }
+}

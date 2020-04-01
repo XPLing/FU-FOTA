@@ -3,7 +3,28 @@ html(lang="en")
     - var title = 'FleetUp FOTA';
     include ../../layout/common/head
 body
-    .panel
-        .panel-header FOTA
-        .panel-body
-            table.easyui-datagrid#firmwareTable
+    div#FOTATabs
+        div.FOTA-tab(title="FOTA")
+            .search-box
+                .search-input
+                    input#FOTASearch
+                    div#FOTASearchMenu
+                        div(data-options="name:'Company Name',iconCls:'icon-ok'") Company Name
+                        div(data-options="name:'Firmware Version',iconCls:'icon-ok'") Firmware Version
+                .filter
+                    label(data-trans-text="MESS_Device_Type")
+                    |：
+                    select.search-filter(name="deviceType")
+                        option(value="1") 2GL
+                        option(value="2") 3NW
+            //.operation-box#FOTATabTool
+            //    button.easyui-linkbutton.batch-upgrade(data-options="iconCls:'icon-reload'") Batch Upgrade
+            table.easyui-datagrid.FOTA-table#FOTATable
+        div(title="Firmware")
+            #FirmwareTabTool
+                a.easyui-linkbutton(href="javascript:void(0);", data-trans-text="MESS_New", data-options="iconCls:'icon-add',plain:true")
+
+    div#FOTAUpgradeDialog
+        form.c-form#FOTAUpgradeForm
+            .c-form-group
+    div#FOTABatchUpgradeDialog
