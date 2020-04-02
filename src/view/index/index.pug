@@ -29,7 +29,7 @@ body
                     | ：
                     select.search-filter#firmwareFilter(name="deviceType")
             table.firmware-table#firmwareTable
-    div#FOTAUpgradeDialog
+    #FOTAUpgradeDialog
         form.c-form.FOTA-upgrade-form#FOTAUpgradeForm
             .c-form-group
                 label.field-name(for="upgradeDevId", data-trans-text="MESS_Device_ID")
@@ -43,7 +43,7 @@ body
                     option(value="1") 2GL
                     option(value="2") 3NW
             .c-form-group
-                label.field-name(for="upgradeCurrentFWV", data-trans-text="MESS_CurrentFWV")
+                label.field-name(for="upgradeCurrentFWV", data-trans-text="MESS_Current_Firmware")
                 input.field-cont(id="upgradeCurrentFWV", disabled, value="JT701_20181010_V1.5_M35_SST26_LoRa_UNIVERSAL")
             .c-form-group(data-scope="batch")
                 label.field-name(for="upgradeNewFW", data-trans-text="MESS_NewFW")
@@ -53,3 +53,65 @@ body
             .c-form-group(data-scope="batch")
                 label.field-name(for="upgradeExpireDate", data-trans-text="MESS_ExpireDate_Command")
                 input.field-cont(id="upgradeExpireDate")
+    .firmware-dialog#firmwareDialog
+        form.c-form.firmware-form#firmwareForm
+            .c-form-group
+                label.field-name(for="firmwareName", data-trans-text="MESS_FirmwareName")
+                select.field-cont(id="firmwareName")
+                    option(value="1") 2GL
+                    option(value="2") 3NW
+            .c-form-group
+                label.field-name(data-trans-text="MESS_Device_Type")
+                .field-cont.fw-dialog-deviceType
+                    label
+                        input(type="checkbox",name="deviceType",value="1")
+                        | 2GL
+                    label
+                        input(type="checkbox",name="deviceType",value="2")
+                        | 3NW
+                    label
+                        input(type="checkbox",name="deviceType",value="2")
+                        | 3NW
+                    label
+                        input(type="checkbox",name="deviceType",value="2")
+                        | 3NW
+                    label
+                        input(type="checkbox",name="deviceType",value="2")
+                        | 3NW
+                    label
+                        input(type="checkbox",name="deviceType",value="2")
+                        | 3NW
+                    label
+                        input(type="checkbox",name="deviceType",value="2")
+                        | 3NW
+                    label
+                        input(type="checkbox",name="deviceType",value="2")
+                        | 3NW
+                    label
+                        input(type="checkbox",name="deviceType",value="2")
+                        | 3NW
+                    label
+                        input(type="checkbox",name="deviceType",value="2")
+                        | 3NW
+            .c-form-group
+                label.field-name(for="firmwareVersion", data-trans-text="MESS_Firmware")
+                input.field-cont(id="firmwareVersion")
+            .c-form-group
+                label.field-name(for="releaseNotes", data-trans-text="MESS_Release_Notes")
+                input.field-cont(id="releaseNotes")
+            .c-form-group(data-scope="edit")
+                .field-name(data-trans-text="MESS_File_Size")
+                .field-cont
+            .c-form-group(data-scope="edit")
+                .field-name(data-trans-text="MESS_Add_By")
+                .field-cont
+            .c-form-group(data-scope="edit")
+                label.field-name(for="firmwareDescription", data-trans-text="MESS_Description")
+                input.field-cont(id="firmwareDescription")
+            .c-form-group(data-scope="edit")
+                label.field-name(for="firmwareStatus", data-trans-text="MESS_Status")
+                select.field-cont(id="firmwareStatus")
+                    option(value="1") In-Use
+                    option(value="2") Expire
+    #firmwareExpireDialog
+        p.expire-tip(data-trans-text="MESS_Expire_Confirm_Msg")

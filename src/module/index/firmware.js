@@ -40,6 +40,9 @@ export function initFirmwareTable () {
         iconCls: 'icon-add',
         text: $.i18n.prop('MESS_New'),
         handler: function () {
+          const $this = $(this);
+
+          $('#firmwareDialog').data('target', $this.attr('class')).dialog('open');
         }
       }
     ],
@@ -92,6 +95,104 @@ export function initFirmwareTable () {
   if (tablePanel[0]) {
     tablePanel.on('click', '[data-operate]', function () {
       const $this = $(this), type = $this.data('operate');
+      const row = table.datagrid('getRows')[$this.data('index')];
+      if (type === 'edit') {
+        $('#firmwareDialog').data({ row: row, target: this.className }).dialog('open');
+      } else if (type === 'expire') {
+        $('#firmwareExpireDialog').data({ row: row }).dialog('open');
+      }
+
     });
   }
+  initDialog(dialogBeforeOpen, dialogOpen, dialogConfirmFn);
+  initExpireDialog(expireConfirmFn);
+}
+
+// initial firmware Dialog
+function initExpireDialog (confirmFn, other) {
+  const dialog = $('#firmwareExpireDialog');
+  const opts = Object.assign({}, {
+    title: $.i18n.prop('MESS_Confirm'),
+    width: calculateWH(300),
+    height: calculateWH(150),
+    closed: true,
+    cache: false,
+    modal: true,
+    buttons: [
+      {
+        text: 'Ok',
+        iconCls: 'icon-ok',
+        handler: function () {
+          confirmFn && confirmFn(dialog);
+        }
+      },
+      {
+        text: 'Cancel',
+        iconCls: 'icon-no',
+        handler: function () {
+          dialog.dialog('close');
+        }
+      }
+    ]
+  }, other);
+  dialog.dialog(opts);
+}
+
+function initDialog (beforeOpenFn, openFn, confirmFn, other) {
+  const dialog = $('#firmwareDialog');
+  const opts = Object.assign({}, {
+    title: $.i18n.prop('MESS_Create_Firmware'),
+    width: calculateWH(500),
+    height: calculateWH(350),
+    closed: true,
+    cache: false,
+    modal: true,
+    onBeforeOpen: beforeOpenFn(dialog),
+    onOpen: openFn(dialog),
+    buttons: [
+      {
+        text: 'Submit',
+        handler: function () {
+          confirmFn && confirmFn(dialog);
+        }
+      },
+      {
+        text: 'Cancel',
+        handler: function () {
+          dialog.dialog('close');
+        }
+      }
+    ]
+  }, other);
+  dialog.dialog(opts);
+}
+
+function dialogBeforeOpen (dialog) {
+  return () => {
+    const target = dialog.data('target');
+    let title;
+    if (target.indexOf('operate') === -1) {
+      dialog.find('.c-form-group').filter('[data-scope="edit"]').hide();
+      title = $.i18n.prop('MESS_Create_Firmware');
+    } else {
+      dialog.find('.c-form-group').filter(':hidden').show();
+      title = $.i18n.prop('MESS_Edit_Firmware');
+    }
+    dialog.dialog('setTitle', title);
+  };
+}
+
+function dialogOpen (dialog) {
+  return () => {
+    const row = dialog.data('row');
+    console.log(row);
+  };
+}
+
+function dialogConfirmFn (dialog) {
+
+}
+
+function expireConfirmFn (dialog) {
+
 }
