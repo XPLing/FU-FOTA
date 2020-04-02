@@ -1,17 +1,17 @@
 import axios from 'axios';
 // axios.defaults.withCredentials = true // 让ajax携带cookie
 const whiteList = '';
-export let pending = []; //  声明一个数组用于存储每个ajax请求的取消函数和ajax标识
-let CancelToken = axios.CancelToken;
+export const pending = []; //  声明一个数组用于存储每个ajax请求的取消函数和ajax标识
+const CancelToken = axios.CancelToken;
 
-let DEFULT = {
+const DEFULT = {
   whiteList: '',
   pending: []
 };
 
-export let removePending = (config, obj) => {
-  for (let p in obj) {
-    let reg = new RegExp(config.url);
+export const removePending = (config, obj) => {
+  for (const p in obj) {
+    const reg = new RegExp(config.url);
     if (obj[p].u === config.url + '&' + config.method && !reg.test(whiteList) && !(config.other && config.other.concurrent)) { // 当当前请求在数组中存在时执行函数体
       obj[p].f(); //  执行取消操作
       obj.splice(p, 1); //  把这条记录从数组中移除
@@ -20,12 +20,13 @@ export let removePending = (config, obj) => {
 };
 
 class Axios {
-  constructor() {
+  constructor () {
     this.config = DEFULT;
   }
-  init(config, dConf) {
+
+  init (config, dConf) {
     Object.assign({}, this.config, dConf);
-    let instance = axios.create(config);
+    const instance = axios.create(config);
     //  添加请求拦截器
     instance.interceptors.request.use(config => {
       removePending(config, this.config.pending); // 在一个ajax发送前执行一下取消操作
@@ -108,7 +109,5 @@ class Axios {
     return instance(config);
   }
 }
-
-
 
 export default new Axios();

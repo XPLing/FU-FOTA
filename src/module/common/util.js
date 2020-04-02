@@ -64,3 +64,27 @@ export function calculateWH (num) {
   windowW = windowW > 1550 ? 1550 / 10 : windowW / 10;
   return num / baseConfig.originWidth * windowW;
 }
+
+export class InitDataGrid {
+  constructor (table, opt) {
+    this.id = InitDataGrid.COLLECTIONID;
+    this.table = table;
+    table.data('gridId', this.id);
+    this.opts = Object.assign({}, {}, opt);
+    const tablePanel = table.datagrid(this.opts);
+    this.tablePanel = tablePanel.datagrid('getPanel');
+    this.collection(this);
+  }
+
+  collection (target) {
+    InitDataGrid.COLLECTION.push(target);
+    InitDataGrid.COLLECTIONID++;
+  }
+
+  getCollection (id) {
+    return InitDataGrid.COLLECTION.filter(val => val.id === id);
+  }
+}
+
+InitDataGrid.COLLECTION = [];
+InitDataGrid.COLLECTIONID = 1;

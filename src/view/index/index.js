@@ -4,17 +4,22 @@
 import 'babel-polyfill';
 import 'easyui';
 import '1i8n';
-import 'assets/style/base';
+import 'assets/style/common';
 import './index.scss';
-import { loadProperties } from 'src/module/common/util';
+import { loadProperties, calculateWH } from 'src/module/common/util';
+import { initFOTATable } from 'src/module/index/FOTA';
+import { initFirmwareTable } from 'src/module/index/firmware';
+import { getDeviceType, getFotaList } from 'src/assets/api/index';
 
 $(function () {
   init();
   loadProperties($);
-  // initial tab
-  $('#FOTATabs').tabs({});
-  initFOTATable();
-
+  initTabs();
+  // getDeviceType().then((res) => {
+  //   console.log(res);
+  // }).catch(e => {
+  //   console.log(e);
+  // });
 });
 
 function init () {
@@ -25,96 +30,25 @@ function init () {
   }
 }
 
-function initFOTATable () {
-  const FOTATable = $('#FOTATable');
-  $('#FOTASearch').searchbox({
-    width: 300,
-    searcher (value, name) {
-      console.log(value + ',' + name);
-    },
-    menu: '#FOTASearchMenu',
-    prompt: 'Please Input Value'
-  });
-  const FOTATablePanel = FOTATable.datagrid({
-    // toolbar: '#FOTATabTool',
-    toolbar: [
-      {
-        iconCls: 'icon-reload batch-upgrade',
-        text: 'Batch Upgrade',
-        handler: function () {}
-      }
-    ],
-    columns: [[
-      { field: 'checkbox', checkbox: true },
-      { field: 'companyName', title: $.i18n.prop('MESS_Company_Name') },
-      { field: 'deviceId', title: $.i18n.prop('MESS_Device_ID') },
-      { field: 'VehicleAsset', title: $.i18n.prop('MESS_Vehicle#Asset#') },
-      { field: 'status', title: $.i18n.prop('MESS_SubTap_Status') },
-      { field: 'UpgradingFW', title: $.i18n.prop('MESS_UpgradingFW') },
-      { field: 'CurrentFW', title: $.i18n.prop('MESS_CurrentFW') },
-      { field: 'OperatedBy', title: $.i18n.prop('MESS_OperatedBy') },
-      { field: 'Last_Update', title: $.i18n.prop('MESS_Last_Update') },
-      {
-        field: 'Operation',
-        title: $.i18n.prop('MESS_Operation'),
-        formatter: function (value, row, index) {
-          return `<span class="c-icon icon-reload operate" data-operate="upgrading" data-index=${index}></span>`;
+function initTabs () {
+  // initial tab
+  const FOTATabs = $('#FOTATabs');
+  FOTATabs.tabs({
+    onSelect: function (title, index) {
+      const tab = FOTATabs.tabs('getTab', index);
+      const isFirst = tab.data('first');
+      if (isFirst != 1) {
+        tab.data('first', 1);
+        switch (index) {
+          case 0: // FOTA
+            initFOTATable();
+            break;
+          case 1: // firmware
+            initFirmwareTable();
+            break;
         }
       }
-    ]],
-    data: [
-      {
-        companyName: 'value11',
-        deviceId: 'value12',
-        VehicleAsset: 12,
-        UpgradingFW: 22,
-        CurrentFW: 20,
-        status: '85%Or300/475',
-        OperatedBy: 'Brett',
-        Last_Update: '2020-03-16T16:30:00Z',
-        Operation: '123'
-      },
-      {
-        companyName: 'value11',
-        deviceId: 'value12',
-        VehicleAsset: 12,
-        UpgradingFW: 23,
-        status: '85%Or300/475',
-        OperatedBy: 'Brett',
-        Last_Update: '2020-03-16T16:30:00Z'
-      }
-    ]
-  }).datagrid('getPanel');
-  if (FOTATablePanel[0]) {
-    FOTATablePanel.on('click', '[data-operate]', function () {
-      const $this = $(this), type = $this.data('operate');
-      if (type === 'upgrading') {
-        const row = FOTATable.datagrid('getRows')[$this.data('index')];
-        $('#FOTAUpgradeDialog').data('row', row).dialog('open');
-      }
-    });
-  }
-  initFOTAUpgradeDialog(FOTAUpgradeDialogOpen);
+    }
+  });
 }
 
-// initial FOTA Upgrade Dialog
-function initFOTAUpgradeDialog (openFn, other) {
-  const dialog = $('#FOTAUpgradeDialog');
-  const opts = Object.assign({}, {
-    title: 'FOTA Upgrading',
-    width: 400,
-    height: 200,
-    closed: true,
-    cache: false,
-    modal: true,
-    onOpen: openFn(dialog)
-  }, other);
-  dialog.dialog(opts);
-}
-
-function FOTAUpgradeDialogOpen (dialog) {
-  return () => {
-    const row = dialog.data('row');
-    console.log(row);
-  };
-}

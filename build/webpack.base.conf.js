@@ -26,8 +26,8 @@ module.exports = {
     path: config.build.assetsRoot,
     filename: '[name].js',
     publicPath: process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'production_testing'
-                ? config.build.assetsPublicPath
-                : config.dev.assetsPublicPath
+      ? config.build.assetsPublicPath
+      : config.dev.assetsPublicPath
   },
   resolve: {
     extensions: ['.js', '.json', '.scss'],
@@ -52,7 +52,7 @@ module.exports = {
       },
       {
         test: /\.pug$/,
-        use:  ['html-loader','pug-html-loader']
+        use: ['html-loader', 'pug-html-loader']
       },
       {
         test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
@@ -79,7 +79,8 @@ module.exports = {
         }
       },
       {
-        test: Object.keys(entries).map(e=>resolve(entries[e])),
+        test: /\.js$/,
+        include: [resolve('src/view'), resolve('src/module')],
         use: [
           {
             loader: 'imports-loader',

@@ -13,18 +13,43 @@ body
                         div(data-options="name:'Firmware Version',iconCls:'icon-ok'") Firmware Version
                 .filter
                     label(data-trans-text="MESS_Device_Type")
-                    |：
-                    select.search-filter(name="deviceType")
-                        option(value="1") 2GL
-                        option(value="2") 3NW
+                    | ：
+                    select.search-filter#FOTAFilter(name="deviceType")
             //.operation-box#FOTATabTool
             //    button.easyui-linkbutton.batch-upgrade(data-options="iconCls:'icon-reload'") Batch Upgrade
             table.easyui-datagrid.FOTA-table#FOTATable
-        div(title="Firmware")
-            #FirmwareTabTool
-                a.easyui-linkbutton(href="javascript:void(0);", data-trans-text="MESS_New", data-options="iconCls:'icon-add',plain:true")
-
+        div.firmware-tab(title="Firmware")
+            .search-box
+                .search-input
+                    input#firmwareSearch
+                    div#firmwareSearchMenu
+                        div(data-options="name:'Firmware Version',iconCls:'icon-ok'") Firmware Version
+                .filter
+                    label(data-trans-text="MESS_Device_Type")
+                    | ：
+                    select.search-filter#firmwareFilter(name="deviceType")
+            table.firmware-table#firmwareTable
     div#FOTAUpgradeDialog
-        form.c-form#FOTAUpgradeForm
+        form.c-form.FOTA-upgrade-form#FOTAUpgradeForm
             .c-form-group
-    div#FOTABatchUpgradeDialog
+                label.field-name(for="upgradeDevId", data-trans-text="MESS_Device_ID")
+                input.field-cont(id="upgradeDevId")
+            .c-form-group
+                label.field-name(for="upgradeVehicleOrAsset", data-trans-text="MESS_Vehicle#Asset#")
+                input.field-cont(id="upgradeVehicleOrAsset")
+            .c-form-group(data-scope="batch")
+                label.field-name(for="upgradeDeviceType", data-trans-text="MESS_Device_Type")
+                select.field-cont(id="upgradeDeviceType")
+                    option(value="1") 2GL
+                    option(value="2") 3NW
+            .c-form-group
+                label.field-name(for="upgradeCurrentFWV", data-trans-text="MESS_CurrentFWV")
+                input.field-cont(id="upgradeCurrentFWV", disabled, value="JT701_20181010_V1.5_M35_SST26_LoRa_UNIVERSAL")
+            .c-form-group(data-scope="batch")
+                label.field-name(for="upgradeNewFW", data-trans-text="MESS_NewFW")
+                select.field-cont(id="upgradeNewFW")
+                    option(value="1", selected) JT701_20181010_V1.5_M35_SST26_LoRa_UNIVERSAL
+                    option(value="2") JT702_20181118_V1.5_M35_SST26_LoRa_UNIVERSAL
+            .c-form-group(data-scope="batch")
+                label.field-name(for="upgradeExpireDate", data-trans-text="MESS_ExpireDate_Command")
+                input.field-cont(id="upgradeExpireDate")

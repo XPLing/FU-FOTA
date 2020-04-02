@@ -17,6 +17,14 @@
     }
   }
 }
+.FOTA-upgrade-form{
+  padding: formatVal(10,rem) formatVal(20,rem);
+  .field-name{
+    flex: 0 0 30%;
+    text-align: right;
+  }
+  .field-cont{}
+}
 .c-icon{
   display: inline-block;
   width: 16px;
