@@ -1,0 +1,98 @@
+doctype html
+html(lang="en")
+    - var title = 'FleetUp FOTA';
+    include ../../layout/common/head
+body
+    div#FOTATabs
+        div.c-tab.FOTA-tab(title="FOTA")
+            #FOTATabTool
+                .search-box(data-starget='FOTASearch', data-ftarget='FOTAFilter')
+                    .search-input
+                        input#FOTASearch
+                        div#FOTASearchMenu
+                            div(data-options="name:'Company Name',iconCls:'icon-ok'") Company Name
+                            div(data-options="name:'Firmware Version',iconCls:'icon-ok'") Firmware Version
+                    .filter
+                        label(data-trans-text="MESS_Device_Type")
+                        | ：
+                        input.search-filter#FOTAFilter(name="deviceType", value=2)
+                .operation-box
+                    a.easyui-linkbutton.batch-upgrade(data-options="iconCls:'icon-reload'")
+                        span(data-trans-text="MESS_Batch_Upgrade")
+            table.easyui-datagrid.FOTA-table#FOTATable
+            #FOTAUpgradeDialog
+                form.c-form.FOTA-upgrade-form#FOTAUpgradeForm
+                    .c-form-group
+                        label.field-name(for="upgradeDevId", data-trans-text="MESS_Device_ID")
+                        input.field-cont(id="upgradeDevId")
+                    .c-form-group
+                        label.field-name(for="upgradeVehicleOrAsset", data-trans-text="MESS_Vehicle#Asset#")
+                        input.field-cont(id="upgradeVehicleOrAsset")
+                    .c-form-group(data-scope="batch")
+                        label.field-name(for="upgradeDeviceType", data-trans-text="MESS_Device_Type")
+                        select.field-cont(id="upgradeDeviceType")
+                            option(value="1") 2GL
+                            option(value="2") 3NW
+                    .c-form-group
+                        label.field-name(for="upgradeCurrentFWV", data-trans-text="MESS_Current_Firmware")
+                        input.field-cont(id="upgradeCurrentFWV", disabled, value="JT701_20181010_V1.5_M35_SST26_LoRa_UNIVERSAL")
+                    .c-form-group(data-scope="batch")
+                        label.field-name(for="upgradeNewFW", data-trans-text="MESS_NewFW")
+                        select.field-cont(id="upgradeNewFW")
+                            option(value="1", selected) JT701_20181010_V1.5_M35_SST26_LoRa_UNIVERSAL
+                            option(value="2") JT702_20181118_V1.5_M35_SST26_LoRa_UNIVERSAL
+                    .c-form-group(data-scope="batch")
+                        label.field-name(for="upgradeExpireDate", data-trans-text="MESS_ExpireDate_Command")
+                        input.field-cont(id="upgradeExpireDate")
+        div.c-tab.firmware-tab(title="Firmware")
+            #firmwareTabTool
+                .search-box(data-starget='firmwareSearch', data-ftarget='firmwareFilter')
+                    .search-input
+                        input#firmwareSearch
+                        div#firmwareSearchMenu
+                            div(data-options="name:'Firmware Version',iconCls:'icon-ok'") Firmware Version
+                    .filter
+                        label(data-trans-text="MESS_Device_Type")
+                        | ：
+                        input.search-filter#firmwareFilter(name="deviceType", value=2)
+                .operation-box
+                    a.easyui-linkbutton.firmware-new(data-options="iconCls:'icon-add'")
+                        span(data-trans-text="MESS_New")
+            table.firmware-table#firmwareTable
+            .firmware-dialog#firmwareDialog
+                form.c-form.firmware-form#firmwareForm
+                    .c-form-group
+                        label.field-name(for="firmwareName", data-trans-text="MESS_FirmwareName")
+                        select.field-cont#firmwareName
+                    .c-form-group
+                        label.field-name(data-trans-text="MESS_Device_Type")
+                        .field-cont.fw-dialog-deviceType#fwDialogDeviceType
+                    .c-form-group
+                        label.field-name(for="firmwareVersion", data-trans-text="MESS_Description")
+                        input.field-cont(id="firmwareVersion")
+                    .c-form-group
+                        label.field-name(for="firmwareStage", data-trans-text="MESS_FirmwareStage")
+                        select.field-cont#firmwareStage
+                    .c-form-group
+                        label.field-name(for="releaseNotes", data-trans-text="MESS_Release_Notes")
+                        input.field-cont(id="releaseNotes")
+                    .c-form-group(data-scope="edit")
+                        .field-name(data-trans-text="MESS_File_Size")
+                        .field-cont
+                    .c-form-group(data-scope="edit")
+                        .field-name(data-trans-text="MESS_Add_By")
+                        .field-cont
+                    .c-form-group(data-scope="edit")
+                        label.field-name(for="firmwareDescription", data-trans-text="MESS_Description")
+                        input.field-cont(id="firmwareDescription")
+                    .c-form-group(data-scope="edit")
+                        label.field-name(for="firmwareStatus", data-trans-text="MESS_Status")
+                        select.field-cont(id="firmwareStatus")
+                            option(value="1") In-Use
+                            option(value="2") Expire
+            #firmwareExpireDialog
+                p.expire-tip(data-trans-text="MESS_Expire_Confirm_Msg")
+    .c-loading
+        .cont
+            .panel-loading loading...
+

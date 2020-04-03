@@ -9,6 +9,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 const env = process.env.NODE_ENV === 'production_testing'
   ? require('../config/prod.test.env')
@@ -61,7 +62,7 @@ const webpackConfig = merge(baseWebpackConfig, {
       chunks: 'all',
       minSize: 0,
       minChunks: 2,
-      cacheGroups:{
+      cacheGroups: {
         vendors: {
           chunks: 'all',
           name: 'vendors',
@@ -82,6 +83,7 @@ const webpackConfig = merge(baseWebpackConfig, {
     }
   },
   plugins: [
+    new CleanWebpackPlugin(),
     // http://vuejs.github.io/vue-loader/en/workflow/production.html
     new webpack.DefinePlugin({
       'process.env': require('../config/prod.env')

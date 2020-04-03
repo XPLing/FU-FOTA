@@ -10,20 +10,43 @@
 .c-form {
   .c-form-group {
     display: flex;
-    &+.c-form-group{
-      margin-top: formatVal(20,rem);
+
+    & + .c-form-group {
+      margin-top: formatVal(20, rem);
     }
-    .field-name{
+
+    .field-name {
       margin-right: 1em;
     }
-    .field-cont{
-        flex: 1;
+
+    .field-cont {
+      flex: 1;
     }
 
   }
 }
 
+.c-loading {
+  display: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: $color-transparency-white-5;
 
+  .cont {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  &.active {
+    display: block;
+  }
+}
 
 
 

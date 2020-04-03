@@ -32,7 +32,6 @@ function getEntry (globPath, noFolder) {
       filesPath = path.dirname(entry).replace('./src/', '');
       entryName = filesPath + '/' + filesname;
     }
-
     entries[entryName] = entry;
   });
   return entries;
@@ -49,7 +48,7 @@ exports.htmlPlugins = function () {
   for (var pathname in pages) {
     // 配置生成的html文件，定义路径等
     let chunks = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'production_testing' ? ['runtime', 'vendors', 'common', pathname.replace(/^(view\/).*\/(.*)/, '$2')] : [pathname.replace(/^(view\/).*\/(.*)/, '$2')];
-    var filename = pathname.replace(/^(view\/).*\/(.*)/, '$1$2');
+    var filename = pathname.replace(/^(view\/).*\/(.*)/, '$2');
     var conf = {
       filename: filename + '.html',
       template: pages[pathname], // 模板路径

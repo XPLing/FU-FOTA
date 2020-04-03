@@ -1,17 +1,23 @@
-import { calculateWH, InitDataGrid } from '../common/util';
-import { getFirmwareUrl } from 'src/assets/api/index';
+import { calculateWH, loading, finish, mesgTip } from '../common/util';
+import { getDeviceType, getRequestUrl, InitDataGrid, searchClickHank } from './common';
+import { getFirmwareUrl, getFirmwareList, getFirmwareVList } from 'src/assets/api/index';
+
+let deviceTypeMap;
 
 export function initFirmwareTable () {
-  const table = $('#firmwareTable');
+  deviceTypeMap = getDeviceType();
+  initFwDialogDeviceType();
+  const table = $('#firmwareTable'), search = $('#firmwareSearch'), tab = $('.firmware-tab');
   // search box
-  $('#firmwareSearch').searchbox({
+  search.searchbox({
     width: calculateWH(280),
     searcher (value, name) {
-      console.log(value + ',' + name);
+      table.datagrid('load');
     },
     menu: '#firmwareSearchMenu',
     prompt: $.i18n.prop('MESS_Input_Value')
   });
+  searchClickHank(tab.find('.searchbox'), search.searchbox('menu'));
   // device type filter
   $('#firmwareFilter').combobox({
     width: calculateWH(100),
@@ -20,32 +26,16 @@ export function initFirmwareTable () {
     valueField: 'value',
     textField: 'label',
     multiple: true,
-    data: [
-      {
-        label: '2GL',
-        value: 2
-      },
-      {
-        label: '3NW',
-        value: 3
-      }
-    ]
+    data: deviceTypeMap,
+    onChange: function (newValue, oldValue) {
+      table.datagrid('load');
+    }
   });
   // table
   const datagrid = new InitDataGrid(table, {
-    url: getFirmwareUrl,
+    method: 'GET',
     pagination: true,
-    toolbar: [
-      {
-        iconCls: 'icon-add',
-        text: $.i18n.prop('MESS_New'),
-        handler: function () {
-          const $this = $(this);
-
-          $('#firmwareDialog').data('target', $this.attr('class')).dialog('open');
-        }
-      }
-    ],
+    toolbar: '#firmwareTabTool',
     columns: [[
       { field: 'companyName', title: $.i18n.prop('MESS_Firmware') },
       { field: 'deviceId', title: $.i18n.prop('MESS_Device_Type') },
@@ -53,7 +43,7 @@ export function initFirmwareTable () {
       { field: 'UpgradingFW', title: $.i18n.prop('MESS_File_Size') },
       { field: 'CurrentFW', title: $.i18n.prop('MESS_Add_By') },
       { field: 'OperatedBy', title: $.i18n.prop('MESS_Description') },
-      { field: 'status', title: $.i18n.prop('MESS_SubTap_Status') },
+      { field: 'status', title: $.i18n.prop('MESS_Status') },
       { field: 'Create_Time', title: $.i18n.prop('MESS_Create_Time') },
       { field: 'Last_Update', title: $.i18n.prop('MESS_Last_Update') },
       {
@@ -89,23 +79,49 @@ export function initFirmwareTable () {
         OperatedBy: 'Brett',
         Last_Update: '2020-03-16T16:30:00Z'
       }
-    ]
+    ],
+    loader: function (params, success, error) {
+      loadData(params, success, error);
+    },
+    onLoadSuccess: function (data) {},
+    onLoadError: function () {
+      console.log('error');
+      // $(this).datagrid('loadData', []);
+    }
   });
+  addToolHandle(table);
   const tablePanel = datagrid.tablePanel;
   if (tablePanel[0]) {
-    tablePanel.on('click', '[data-operate]', function () {
-      const $this = $(this), type = $this.data('operate');
-      const row = table.datagrid('getRows')[$this.data('index')];
-      if (type === 'edit') {
-        $('#firmwareDialog').data({ row: row, target: this.className }).dialog('open');
-      } else if (type === 'expire') {
-        $('#firmwareExpireDialog').data({ row: row }).dialog('open');
-      }
-
-    });
+    addOperateHandle(tablePanel, table);
   }
   initDialog(dialogBeforeOpen, dialogOpen, dialogConfirmFn);
   initExpireDialog(expireConfirmFn);
+}
+
+function initFirmwareVList () {
+  loading();
+  return getFirmwareVList().then(res => {
+    if (!res) {
+      return false;
+    }
+    const firemwareVersion = $('#firmwareName');
+    let dom = '';
+    res.forEach((val, index) => {
+      let select = '';
+      if (index === 0) {
+        select = 'selected';
+      }
+      dom += `<option ${select} value="${val}">${val}</option>`;
+    });
+    firemwareVersion.html(dom);
+  }).catch(e => {
+    console.log(e);
+    mesgTip('error', {
+      msg: 'Get Firmware Version List: load failed'
+    });
+  }).finally(() => {
+    finish();
+  });
 }
 
 // initial firmware Dialog
@@ -190,9 +206,62 @@ function dialogOpen (dialog) {
 }
 
 function dialogConfirmFn (dialog) {
-
+  console.log(dialog);
 }
 
 function expireConfirmFn (dialog) {
 
+}
+
+function loadData (params, success, error) {
+  const tab = $('.firmware-tab');
+  const requestUrl = getRequestUrl(getFirmwareUrl, tab);
+  return getFirmwareList(requestUrl).then(res => {
+    console.log(res);
+    success(res);
+  }).catch(e => {
+    console.log(e);
+    error();
+  });
+}
+
+function addOperateHandle (tablePanel, table) {
+  tablePanel.on('click', '[data-operate]', function () {
+    const $this = $(this), type = $this.data('operate');
+    const row = table.datagrid('getRows')[$this.data('index')];
+    if (type === 'edit') {
+      $('#firmwareDialog').data({ row: row, target: this.className }).dialog('open');
+    } else if (type === 'expire') {
+      $('#firmwareExpireDialog').data({ row: row }).dialog('open');
+    }
+
+  });
+}
+
+function initFwDialogDeviceType () {
+  if (!deviceTypeMap) {
+    return false;
+  }
+  const fwDialogDeviceType = $('#fwDialogDeviceType');
+  let dom = '';
+  deviceTypeMap.forEach(val => {
+    dom += '<label>' +
+      '<input type="checkbox" name="deviceType" value="' + val.value + '" />' +
+      val.label +
+      '</label>';
+  });
+  fwDialogDeviceType.html(dom);
+}
+
+function addToolHandle (table) {
+  $('.firmware-new').on('click', function () {
+    const $this = $(this);
+    if (!$('#firmwareName').children('option').length) {
+      initFirmwareVList().then(res => {
+        $('#firmwareDialog').data({ target: $this.attr('class') }).dialog('open');
+      });
+    } else {
+      $('#firmwareDialog').data({ target: $this.attr('class') }).dialog('open');
+    }
+  });
 }

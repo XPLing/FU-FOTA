@@ -65,26 +65,33 @@ export function calculateWH (num) {
   return num / baseConfig.originWidth * windowW;
 }
 
-export class InitDataGrid {
-  constructor (table, opt) {
-    this.id = InitDataGrid.COLLECTIONID;
-    this.table = table;
-    table.data('gridId', this.id);
-    this.opts = Object.assign({}, {}, opt);
-    const tablePanel = table.datagrid(this.opts);
-    this.tablePanel = tablePanel.datagrid('getPanel');
-    this.collection(this);
-  }
+export function loading (load = $('.c-loading'), msg = 'loading...') {
+  load.addClass('active').find('.panel-loading').html(msg);
+}
 
-  collection (target) {
-    InitDataGrid.COLLECTION.push(target);
-    InitDataGrid.COLLECTIONID++;
-  }
+export function finish (load = $('.c-loading')) {
+  load.removeClass('active');
+}
 
-  getCollection (id) {
-    return InitDataGrid.COLLECTION.filter(val => val.id === id);
+export function mesgTip (type, opts) {
+  switch (type) {
+    case 'error':
+      errorTip(opts);
+      break;
   }
 }
 
-InitDataGrid.COLLECTION = [];
-InitDataGrid.COLLECTIONID = 1;
+function errorTip (opts) {
+  opts = Object.assign({}, {
+    title: 'Error',
+    msg: 'System has no response.',
+    timeout: 1500,
+    showType: 'fade',
+    style: {
+      right: '',
+      top: '20%',
+      bottom: ''
+    }
+  }, opts);
+  $.messager.show(opts);
+}

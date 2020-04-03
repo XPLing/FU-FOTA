@@ -1,15 +1,16 @@
 /**
  * Created by XPL on 2020/3/31.
  */
-const isProd = process.env.Node === 'production';
+const isProd = process.env.NODE_ENV === 'production';
+const baseAssetsUrl = isProd ? '/static/manage/web/' : '/';
 const requestBase = {
-  host: isProd ? '/' : 'http://localhost:8088'
+  host: isProd ? '/' : '/'
 };
 export const languageConfig = {
-  url: '/geti18n/i18n/'
+  url: baseAssetsUrl + 'static/i18n/'
 };
 export const languageMap = ['en', 'sp', 'po'];
 
 export const baseConfig = {
   originWidth: 128
-}
+};

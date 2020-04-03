@@ -5,28 +5,36 @@ import 'babel-polyfill';
 import 'easyui';
 import '1i8n';
 import 'assets/style/common';
-import './index.scss';
-import { loadProperties, calculateWH } from 'src/module/common/util';
-import { initFOTATable } from 'src/module/index/FOTA';
-import { initFirmwareTable } from 'src/module/index/firmware';
+import './fota.scss';
+import { loading, finish, loadProperties, mesgTip } from 'src/module/common/util';
+import { initFOTATable } from 'src/module/fota/FOTA';
+import { store } from 'src/module/fota/common';
+import { initFirmwareTable } from 'src/module/fota/firmware';
 import { getDeviceType, getFotaList } from 'src/assets/api/index';
 
 $(function () {
   init();
   loadProperties($);
-  initTabs();
-  // getDeviceType().then((res) => {
-  //   console.log(res);
-  // }).catch(e => {
-  //   console.log(e);
-  // });
+  loading();
+  getDeviceType().then((res) => {
+    store.deviceType = res;
+    initTabs();
+  }).catch(e => {
+    console.log(e);
+    mesgTip('error', {
+      msg: $.i18n.prop('MESS_DeviceType_errorMsg')
+    });
+  }).finally(() => {
+    finish();
+  });
+
 });
 
 function init () {
   if (window.parent) {
     // set parent frame nav active status
-    console.log(window.parent.changeTopFrameBarStyle);
-    window.parent.changeTopFrameBarStyle && window.parent.changeTopFrameBarStyle('FOTATD');
+    // console.log(window.parent.changeTopFrameBarStyle);
+    // window.parent.changeTopFrameBarStyle && window.parent.changeTopFrameBarStyle('FOTATD');
   }
 }
 
