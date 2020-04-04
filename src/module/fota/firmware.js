@@ -1,4 +1,4 @@
-import { calculateWH, loading, finish, mesgTip, deserialization } from '../common/util';
+import { calculateWH, loading, finish, mesgTip, deserialization, formatDate } from '../common/util';
 import {
   getDeviceType,
   getRequestUrl,
@@ -45,20 +45,51 @@ export function initFirmwareTable () {
     }
   });
   // table
+  const statusMap = ['Beta', 'Release', 'Specific'];
   const datagrid = new InitDataGrid(table, {
     // method: 'GET',
     pagination: true,
     toolbar: '#firmwareTabTool',
     columns: [[
-      { field: 'companyName', title: $.i18n.prop('MESS_Firmware') },
-      { field: 'deviceId', title: $.i18n.prop('MESS_Device_Type') },
-      { field: 'VehicleAsset', title: $.i18n.prop('MESS_Firmware_Stage') },
-      { field: 'UpgradingFW', title: $.i18n.prop('MESS_File_Size') },
-      { field: 'CurrentFW', title: $.i18n.prop('MESS_Add_By') },
-      { field: 'OperatedBy', title: $.i18n.prop('MESS_Description') },
-      { field: 'status', title: $.i18n.prop('MESS_Status') },
-      { field: 'Create_Time', title: $.i18n.prop('MESS_Create_Time') },
-      { field: 'Last_Update', title: $.i18n.prop('MESS_Last_Update') },
+      { field: 'firmwareVersion', title: $.i18n.prop('MESS_Firmware_Version') },
+      {
+        field: 'deviceType',
+        title: $.i18n.prop('MESS_Device_Type'),
+        formatter: function (value, row, index) {
+          const map = deviceTypeMap || [];
+          const res = map.filter(val => {
+            if (val.value == value) {
+              return val;
+            }
+          });
+          return `<span class="">${res.label}</span>`;
+        }
+      },
+      { field: 'firmwareStage', title: $.i18n.prop('MESS_Firmware_Stage') },
+      { field: 'fileSize', title: $.i18n.prop('MESS_File_Size') },
+      { field: 'addBy', title: $.i18n.prop('MESS_Add_By') },
+      { field: 'description', title: $.i18n.prop('MESS_Description') },
+      {
+        field: 'status',
+        title: $.i18n.prop('MESS_Status'),
+        formatter: function (value, row, index) {
+          return `<span class="">${statusMap[value--]}</span>`;
+        }
+      },
+      {
+        field: 'createTime',
+        title: $.i18n.prop('MESS_Create_Time'),
+        formatter: function (value, row, index) {
+          return `<span class="">${statusMap[formatDate(value, 'yyyy-MM-dd hh:mm:ss')]}</span>`;
+        }
+      },
+      {
+        field: 'lastUpdateTime',
+        title: $.i18n.prop('MESS_Last_Update'),
+        formatter: function (value, row, index) {
+          return `<span class="">${statusMap[formatDate(value, 'yyyy-MM-dd hh:mm:ss')]}</span>`;
+        }
+      },
       {
         field: 'Operation',
         title: $.i18n.prop('MESS_Operation'),
@@ -73,24 +104,27 @@ export function initFirmwareTable () {
     ]],
     data: [
       {
-        companyName: 'value11',
-        deviceId: 'value12',
-        VehicleAsset: 12,
-        UpgradingFW: 22,
-        CurrentFW: 20,
-        status: '85%Or300/475',
-        OperatedBy: 'Brett',
-        Last_Update: '2020-03-16T16:30:00Z',
-        Operation: '123'
+
+        firmwareVersion: 'IDD_213G01_S B2.4.3.2_True_J1939T',
+        deviceType: '3',
+        firmwareStage: 2,
+        fileSize: 222952,
+        addBy: 39124,
+        description: 'IDD_213G01_S B2.4.3.2_True_J1939T',
+        status: 1,
+        createTime: 1585516590393,
+        lastUpdateTime: 1585545445738
       },
       {
-        companyName: 'value11',
-        deviceId: 'value12',
-        VehicleAsset: 12,
-        UpgradingFW: 23,
-        status: '85%Or300/475',
-        OperatedBy: 'Brett',
-        Last_Update: '2020-03-16T16:30:00Z'
+        firmwareVersion: 'IDD_213G01_S V2.5.1_True_J1708_20191030_01',
+        deviceType: '3',
+        firmwareStage: 2,
+        fileSize: 225788,
+        addBy: 39124,
+        description: 'IDD_213G01_S V2.5.1_True_J1708_20191030_01',
+        status: 1,
+        createTime: 1585516960108,
+        lastUpdateTime: 1585516960108
       }
     ]
     // loader: function (params, success, error) {
@@ -213,6 +247,11 @@ function dialogBeforeOpen (table, dialog) {
         field.validatebox('enableValidation');
       }).show();
       title = $.i18n.prop('MESS_Edit_Firmware');
+      const row = dialog.data('row');
+      Object.keys(row).forEach(val => {
+        dialog.find(`[name="${val}"]`).val(row[val]);
+      });
+      dialog.find('form').form('validate');
     }
     dialog.dialog('setTitle', title);
   };

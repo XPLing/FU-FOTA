@@ -1,4 +1,4 @@
-import { calculateWH, loading, finish, mesgTip, deserialization } from '../common/util';
+import { calculateWH, loading, finish, mesgTip, deserialization, formatDate } from '../common/util';
 import { getRequestUrl, InitDataGrid, searchClickHank, getDeviceType, initSelectOptions } from './common';
 import { getFotaListUrl, getFotaList, getFirmwareInfoList, upgradeFota } from 'src/assets/api/index';
 
@@ -27,6 +27,7 @@ export function initFOTATable () {
       table.datagrid('load');
     }
   });
+  const statusMap = ['Beta', 'Release', 'Specific'];
   const datagrid = new InitDataGrid(table, {
     // method: 'GET',
     pagination: true,
@@ -34,13 +35,25 @@ export function initFOTATable () {
     columns: [[
       { field: 'checkbox', checkbox: true },
       { field: 'companyName', title: $.i18n.prop('MESS_Company_Name') },
-      { field: 'deviceId', title: $.i18n.prop('MESS_Device_ID') },
+      { field: 'devId', title: $.i18n.prop('MESS_Device_ID') },
       { field: 'VehicleAsset', title: $.i18n.prop('MESS_Vehicle#Asset#') },
-      { field: 'status', title: $.i18n.prop('MESS_Status') },
-      { field: 'UpgradingFW', title: $.i18n.prop('MESS_UpgradingFW') },
-      { field: 'CurrentFW', title: $.i18n.prop('MESS_Current_Firmware') },
-      { field: 'OperatedBy', title: $.i18n.prop('MESS_OperatedBy') },
-      { field: 'Last_Update', title: $.i18n.prop('MESS_Last_Update') },
+      {
+        field: 'status',
+        title: $.i18n.prop('MESS_Status'),
+        formatter: function (value, row, index) {
+          return `<span class="">${statusMap[value--]}</span>`;
+        }
+      },
+      { field: 'upgradingFirmware', title: $.i18n.prop('MESS_UpgradingFW') },
+      { field: 'currentFirmware', title: $.i18n.prop('MESS_Current_Firmware') },
+      { field: 'operatedBy', title: $.i18n.prop('MESS_OperatedBy') },
+      {
+        field: 'lastUpdateTime',
+        title: $.i18n.prop('MESS_Last_Update'),
+        formatter: function (value, row, index) {
+          return `<span class="">${statusMap[formatDate(value, 'yyyy-MM-dd hh:mm:ss')]}</span>`;
+        }
+      },
       {
         field: 'Operation',
         title: $.i18n.prop('MESS_Operation'),
@@ -51,24 +64,22 @@ export function initFOTATable () {
     ]],
     data: [
       {
-        companyName: 'value11',
-        deviceId: 'value12',
-        VehicleAsset: 12,
-        UpgradingFW: 22,
-        CurrentFW: 20,
-        status: '85%Or300/475',
-        OperatedBy: 'Brett',
-        Last_Update: '2020-03-16T16:30:00Z',
-        Operation: '123'
+        devId: '213GL2016004769jl',
+        upgradingFirmware: 'IDD_213G01_S V2.5.1_True_J1708_20191030_01',
+        messageCount: 225788,
+        messageIndex: 0,
+        status: 0,
+        operatedBy: 39124,
+        lastUpdateTime: 1585517040506
       },
       {
-        companyName: 'value11',
-        deviceId: 'value12',
-        VehicleAsset: 12,
-        UpgradingFW: 23,
-        status: '85%Or300/475',
-        OperatedBy: 'Brett',
-        Last_Update: '2020-03-16T16:30:00Z'
+        devId: '213GL2016004579jl',
+        upgradingFirmware: 'IDD_213G01_S V2.5.1_True_J1708_20191030_01',
+        messageCount: 225788,
+        messageIndex: 0,
+        status: 0,
+        operatedBy: 39124,
+        lastUpdateTime: 1585517040956
       }
     ]
     // loader: function (params, success, error) {
@@ -156,6 +167,11 @@ function FOTAUpgradeDialogBeforeOpen (table, dialog) {
         const field = $(this).find('.easyui-validatebox');
         field.validatebox('enableValidation');
       }).show();
+      const row = dialog.data('row')[0];
+      Object.keys(row).forEach(val => {
+        dialog.find(`[name="${val}"]`).val(row[val]);
+      });
+      dialog.find('form').form('validate');
     }
   };
 }
