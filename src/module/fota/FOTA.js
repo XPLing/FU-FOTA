@@ -1,6 +1,6 @@
-import { calculateWH, loading, finish } from '../common/util';
-import { getRequestUrl, InitDataGrid, searchClickHank, getDeviceType } from './common';
-import { getFotaListUrl, getFotaList } from 'src/assets/api/index';
+import { calculateWH, loading, finish, mesgTip, deserialization } from '../common/util';
+import { getRequestUrl, InitDataGrid, searchClickHank, getDeviceType, initSelectOptions } from './common';
+import { getFotaListUrl, getFotaList, getFirmwareInfoList, upgradeFota } from 'src/assets/api/index';
 
 let deviceTypeMap;
 
@@ -28,7 +28,7 @@ export function initFOTATable () {
     }
   });
   const datagrid = new InitDataGrid(table, {
-    method: 'GET',
+    // method: 'GET',
     pagination: true,
     toolbar: '#FOTATabTool',
     columns: [[
@@ -70,30 +70,52 @@ export function initFOTATable () {
         OperatedBy: 'Brett',
         Last_Update: '2020-03-16T16:30:00Z'
       }
-    ],
-    loader: function (params, success, error) {
-      loadData(params, success, error);
-    },
-    onLoadSuccess: function (data) {},
-    onLoadError: function () {
-      console.log('error');
-      // $(this).datagrid('loadData', []);
-    }
+    ]
+    // loader: function (params, success, error) {
+    //   // loadData(params, success, error);
+    // },
+    // onLoadSuccess: function (data) {},
+    // onLoadError: function () {
+    //   console.log('error');
+    //   // $(this).datagrid('loadData', []);
+    // }
   });
   addToolHandle(table);
   const tablePanel = datagrid.tablePanel;
   addOperateHandle(tablePanel, table);
-  const pager = datagrid.pager;
-  initPageHandle(pager, table);
-  if (pager[0]) {
+  initFOTAUpgradeDialog(table, FOTAUpgradeDialogBeforeOpen, FOTAUpgradeDialogOpen, FOTAUpgradeConfirmFn, {
+    onClose: dialogClose
+  });
+}
 
-  }
-  initFOTAUpgradeDialog(FOTAUpgradeDialogBeforeOpen, FOTAUpgradeDialogOpen, FOTAUpgradeConfirmFn);
+function initFirmwareVList () {
+  loading();
+  return getFirmwareInfoList().then(res => {
+    if (!res) {
+      return false;
+    }
+    initSelectOptions(res, $('#FTAFormNewFW'), true);
+  }).catch(e => {
+    console.log(e);
+    mesgTip('error', {
+      msg: 'Get Firmware Version List: load failed'
+    });
+  }).finally(() => {
+    finish();
+  });
 }
 
 // initial FOTA Upgrade Dialog
-function initFOTAUpgradeDialog (beforeOpenFn, openFn, confirmFn, other) {
+function initFOTAUpgradeDialog (table, beforeOpenFn, openFn, confirmFn, other) {
   const dialog = $('#FOTAUpgradeDialog');
+  dialog.find('form').form();
+  if (other) {
+    Object.keys(other).forEach(key => {
+      if (Object.prototype.toString.apply(other[key]).indexOf('Function') !== -1) {
+        other[key] = other[key](table, dialog);
+      }
+    });
+  }
   const opts = Object.assign({}, {
     title: 'FOTA Upgrading',
     width: calculateWH(500),
@@ -101,13 +123,13 @@ function initFOTAUpgradeDialog (beforeOpenFn, openFn, confirmFn, other) {
     closed: true,
     cache: false,
     modal: true,
-    onBeforeOpen: beforeOpenFn(dialog),
-    onOpen: openFn(dialog),
+    onBeforeOpen: beforeOpenFn(table, dialog),
+    onOpen: openFn(table, dialog),
     buttons: [
       {
         text: 'Upgrade',
         handler: function () {
-          confirmFn && confirmFn(dialog);
+          confirmFn && confirmFn(table, dialog);
         }
       },
       {
@@ -121,26 +143,55 @@ function initFOTAUpgradeDialog (beforeOpenFn, openFn, confirmFn, other) {
   dialog.dialog(opts);
 }
 
-function FOTAUpgradeDialogBeforeOpen (dialog) {
+function FOTAUpgradeDialogBeforeOpen (table, dialog) {
   return () => {
     const target = dialog.data('target');
     if (target.indexOf('operate') === -1) {
-      dialog.find('.c-form-group').not('[data-scope="batch"]').hide();
+      dialog.find('.c-form-group').not('[data-scope="batch"]').each(function () {
+        const field = $(this).find('.easyui-validatebox');
+        field.validatebox('disableValidation');
+      }).hide();
     } else {
-      dialog.find('.c-form-group').filter(':hidden').show();
+      dialog.find('.c-form-group').not('[data-scope="batch"]').each(function () {
+        const field = $(this).find('.easyui-validatebox');
+        field.validatebox('enableValidation');
+      }).show();
     }
   };
 }
 
-function FOTAUpgradeDialogOpen (dialog) {
+function FOTAUpgradeDialogOpen (table, dialog) {
   return () => {
     const row = dialog.data('row');
     console.log(row);
   };
 }
 
-function FOTAUpgradeConfirmFn (dialog) {
+function FOTAUpgradeConfirmFn (table, dialog) {
+  const form = dialog.find('form');
+  const type = dialog.data('target');
+  const row = dialog.data('row');
+  const validate = form.form('validate');
+  if (validate) {
+    const data = deserialization(form.serialize());
+    console.log(data);
+    console.log(row);
+    row.forEach(val => {
+      val = Object.assign({}, val, data);
+    });
+    console.log(row);
+    // upgrade(row).then(() => {
+    //   dialog.dialog('close');
+    //   table.datagrid('load');
+    // });
+  }
+}
 
+function dialogClose (table, dialog) {
+  return () => {
+    const form = dialog.find('form');
+    form[0].reset();
+  };
 }
 
 function loadData (params, success, error) {
@@ -163,15 +214,9 @@ function addOperateHandle (tablePanel, table) {
     const $this = $(this), type = $this.data('operate');
     if (type === 'upgrading') {
       const row = table.datagrid('getRows')[$this.data('index')];
-      $('#FOTAUpgradeDialog').data({ row: row, target: this.className }).dialog('open');
+      initDialogFirmwareVList([row], this);
     }
   });
-}
-
-function initPageHandle (pager, table) {
-  if (!pager[0]) {
-    return false;
-  }
 }
 
 function addToolHandle (table) {
@@ -182,6 +227,24 @@ function addToolHandle (table) {
       $.messager.alert('Warning', $.i18n.prop('MESS_CheckMultiple_ErrorMsg'));
       return false;
     }
-    $('#FOTAUpgradeDialog').data({ row: row, target: $this.attr('class') }).dialog('open');
+    initDialogFirmwareVList(row, this);
   });
+}
+
+function initDialogFirmwareVList (row, _this) {
+  if (!$('#FTAFormNewFW').children('option').length) {
+    initFirmwareVList().then(res => {
+      $('#FOTAUpgradeDialog').data({ row: row, target: _this.className }).dialog('open');
+    });
+  } else {
+    $('#FOTAUpgradeDialog').data({ row: row, target: _this.className }).dialog('open');
+  }
+}
+
+function upgrade (params) {
+  return upgradeFota(params);
+}
+
+function batchUpgrade () {
+
 }

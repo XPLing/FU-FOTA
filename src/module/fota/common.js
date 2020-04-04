@@ -1,4 +1,5 @@
 export var store = {};
+
 export function getRequestUrl (url, scope) {
   if (!url) {
     return '';
@@ -69,4 +70,37 @@ export function getDeviceType () {
     return arr.length ? arr : false;
   }
   return false;
+}
+
+export function initCheckboxList (data, ele, name) {
+  if (!data) {
+    return false;
+  }
+  let dom = '';
+  data.forEach(val => {
+    dom += '<label>' +
+      '<input type="checkbox" name="' + name + '" value="' + val.value + '" />' +
+      val.label +
+      '</label>';
+  });
+  ele.html(dom);
+}
+
+export function initSelectOptions (data, ele, defaultSelect, defaultVal = 0) {
+  if (!data) {
+    return false;
+  }
+  let dom = '';
+  data.forEach((val, index) => {
+    let select = '';
+    if (defaultSelect && index === defaultVal) {
+      select = 'selected';
+    }
+    dom += `<option ${select} value="${val}">${val}</option>`;
+  });
+  ele.html(dom);
+}
+
+export function formatterFormData () {
+
 }
