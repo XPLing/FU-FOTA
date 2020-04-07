@@ -1,14 +1,12 @@
 import { calculateWH, loading, finish, mesgTip, deserialization, formatDate } from '../common/util';
 import {
   getDeviceType,
-  getRequestUrl,
   InitDataGrid,
   searchClickHank,
   initSelectOptions,
-  initCheckboxList
+  initCheckboxList, getInitParams, initSearchBox
 } from './common';
 import {
-  getFirmwareUrl,
   getFirmwareList,
   getFirmwareInfoList,
   updateFirmware,
@@ -19,18 +17,8 @@ let deviceTypeMap;
 
 export function initFirmwareTable () {
   deviceTypeMap = getDeviceType();
-  initCheckboxList(deviceTypeMap, $('#FTAFormDeviceType'), 'deviceType');
+  initCheckboxList(deviceTypeMap, $('#FWFormDeviceType'), 'deviceType');
   const table = $('#firmwareTable'), search = $('#firmwareSearch'), tab = $('.firmware-tab');
-  // search box
-  search.searchbox({
-    width: calculateWH(280),
-    searcher (value, name) {
-      table.datagrid('load');
-    },
-    menu: '#firmwareSearchMenu',
-    prompt: $.i18n.prop('MESS_Input_Value')
-  });
-  searchClickHank(tab.find('.searchbox'), search.searchbox('menu'));
   // device type filter
   $('#firmwareFilter').combobox({
     width: calculateWH(100),
@@ -40,14 +28,17 @@ export function initFirmwareTable () {
     textField: 'label',
     multiple: true,
     data: deviceTypeMap,
+    value: deviceTypeMap[0].value,
     onChange: function (newValue, oldValue) {
       table.datagrid('load');
     }
   });
   // table
-  const statusMap = ['Beta', 'Release', 'Specific'];
+  const statusMap = ['In-Use', 'Expired'];
+  const stageMap = ['Beta', 'Release', 'Specific'];
   const datagrid = new InitDataGrid(table, {
     // method: 'GET',
+    singleSelect: true,
     pagination: true,
     toolbar: '#firmwareTabTool',
     columns: [[
@@ -65,7 +56,13 @@ export function initFirmwareTable () {
           return `<span class="">${res.label}</span>`;
         }
       },
-      { field: 'firmwareStage', title: $.i18n.prop('MESS_Firmware_Stage') },
+      {
+        field: 'firmwareStage',
+        title: $.i18n.prop('MESS_Firmware_Stage'),
+        formatter: function (value, row, index) {
+          return `<span class="">${stageMap[value--]}</span>`;
+        }
+      },
       { field: 'fileSize', title: $.i18n.prop('MESS_File_Size') },
       { field: 'addBy', title: $.i18n.prop('MESS_Add_By') },
       { field: 'description', title: $.i18n.prop('MESS_Description') },
@@ -73,7 +70,7 @@ export function initFirmwareTable () {
         field: 'status',
         title: $.i18n.prop('MESS_Status'),
         formatter: function (value, row, index) {
-          return `<span class="">${statusMap[value--]}</span>`;
+          return `<span class="${value === 1 ? 'txt-danger' : 'txt-success'}">${statusMap[value--]}</span>`;
         }
       },
       {
@@ -126,16 +123,18 @@ export function initFirmwareTable () {
         createTime: 1585516960108,
         lastUpdateTime: 1585516960108
       }
-    ]
-    // loader: function (params, success, error) {
-    //   loadData(params, success, error);
-    // },
-    // onLoadSuccess: function (data) {},
-    // onLoadError: function () {
-    //   console.log('error');
-    //   // $(this).datagrid('loadData', []);
-    // }
+    ],
+    loader: function (params, success, error) {
+      loadData(params, success, error);
+    },
+    onLoadSuccess: function (data) {},
+    onLoadError: function () {
+      console.log('error');
+      // $(this).datagrid('loadData', []);
+    }
   });
+  // search box
+  initSearchBox(table, $('#firmwareTabTool'));
   addToolHandle(table);
   const tablePanel = datagrid.tablePanel;
   if (tablePanel[0]) {
@@ -153,7 +152,13 @@ function initFirmwareVList () {
     if (!res) {
       return false;
     }
-    initSelectOptions(res, $('#firmwareName'), true);
+    res = res.map((val) => {
+      return {
+        label: val,
+        value: val
+      };
+    });
+    initSelectOptions(res, $('#FWFormFirmware'), true);
   }).catch(e => {
     console.log(e);
     mesgTip('error', {
@@ -269,10 +274,25 @@ function dialogConfirmFn (table, dialog) {
   const type = dialog.data('target');
   const row = dialog.data('row');
   const validate = form.form('validate');
+  const deviceTypeCheckbox = form.find('[type="checkbox"][name="deviceType"]');
+  console.log(deviceTypeCheckbox);
+  const deviceType = [];
+  deviceTypeCheckbox.each(function () {
+    if (this.checked) {
+      deviceType.push($(this).val());
+    }
+  });
+  if (deviceType.length === 0) {
+    mesgTip('error', {
+      msg: 'Please select device type!'
+    });
+    return false;
+  }
   if (validate) {
     const data = deserialization(form.serialize());
     console.log(data);
     console.log(row);
+    data.deviceType = deviceType.join(',');
     let promise;
     if (type.indexOf('operate')) {
       // promise = updateHandle()
@@ -298,9 +318,10 @@ function expireConfirmFn (table, dialog) {
 }
 
 function loadData (params, success, error) {
+  const { page, rows } = params;
   const tab = $('.firmware-tab');
-  const requestUrl = getRequestUrl(getFirmwareUrl, tab);
-  return getFirmwareList(requestUrl).then(res => {
+  const { deviceType, firmwareVersion } = getInitParams(tab);
+  return getFirmwareList(deviceType, { firmwareVersion, offset: page, limit: rows }).then(res => {
     console.log(res);
     success(res);
   }).catch(e => {

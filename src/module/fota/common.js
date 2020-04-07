@@ -1,3 +1,5 @@
+import { deserialization } from '../common/util';
+
 export var store = {};
 
 export function getRequestUrl (url, scope) {
@@ -24,6 +26,15 @@ export function getRequestUrl (url, scope) {
     }
   }
   return url + params;
+}
+
+export function getInitParams (scope) {
+  if (!scope) {
+    return '';
+  }
+  const searchBox = scope.find('.search-box');
+  const data = deserialization(searchBox.serialize());
+  return data;
 }
 
 export class InitDataGrid {
@@ -96,11 +107,24 @@ export function initSelectOptions (data, ele, defaultSelect, defaultVal = 0) {
     if (defaultSelect && index === defaultVal) {
       select = 'selected';
     }
-    dom += `<option ${select} value="${val}">${val}</option>`;
+    dom += `<option ${select} value="${val.value}">${val.label}</option>`;
   });
   ele.html(dom);
 }
 
 export function formatterFormData () {
 
+}
+
+export function initSearchBox (table, searchbox) {
+  searchbox.find('input[name]').each(function () {
+    $(this).siblings('input.textbox-text[type="text"]').on('keydown', function (e) {
+      if (e && e.keyCode == 13) {
+        table.datagrid('load');
+      }
+    });
+  });
+  searchbox.find('.submit-btn').on('click', function (e) {
+    table.datagrid('load');
+  });
 }

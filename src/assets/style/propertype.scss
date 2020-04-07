@@ -1,4 +1,12 @@
 /*-----propertype------*/
+.txt-danger {
+  color: $color-auxiliary-red;
+}
+
+.txt-success {
+  color: $color-webchat;
+}
+
 .f-l {
   float: left;
 }
@@ -33,6 +41,7 @@
   bottom: 0;
   left: 0;
   right: 0;
+  z-index: 9999;
   background-color: $color-transparency-white-5;
 
   .cont {

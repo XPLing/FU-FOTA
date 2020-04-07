@@ -1,21 +1,22 @@
-import { calculateWH, loading, finish, mesgTip, deserialization, formatDate } from '../common/util';
-import { getRequestUrl, InitDataGrid, searchClickHank, getDeviceType, initSelectOptions } from './common';
+import { calculateWH, loading, finish, mesgTip, deserialization, formatDate, ellipsis } from '../common/util';
+import {
+  getRequestUrl,
+  InitDataGrid,
+  searchClickHank,
+  getDeviceType,
+  initSelectOptions,
+  getInitParams,
+  initSearchBox
+} from './common';
 import { getFotaListUrl, getFotaList, getFirmwareInfoList, upgradeFota } from 'src/assets/api/index';
 
 let deviceTypeMap;
 
 export function initFOTATable () {
   deviceTypeMap = getDeviceType();
+  // initSelectOptions(deviceTypeMap, $('#FTAFormDeviceType'), true);
   const table = $('#FOTATable'), search = $('#FOTASearch'), tab = $('.FOTA-tab');
-  search.searchbox({
-    width: calculateWH(280),
-    searcher (value, name) {
-      table.datagrid('load');
-    },
-    menu: '#FOTASearchMenu',
-    prompt: $.i18n.prop('MESS_Input_Value')
-  });
-  searchClickHank(tab.find('.searchbox'), search.searchbox('menu'));
+
   $('#FOTAFilter').combobox({
     width: calculateWH(100),
     panelHeight: calculateWH(150),
@@ -23,25 +24,32 @@ export function initFOTATable () {
     valueField: 'value',
     textField: 'label',
     data: deviceTypeMap,
+    value: deviceTypeMap[0].value,
     onChange: function (newValue, oldValue) {
       table.datagrid('load');
     }
   });
-  const statusMap = ['Beta', 'Release', 'Specific'];
   const datagrid = new InitDataGrid(table, {
     // method: 'GET',
     pagination: true,
     toolbar: '#FOTATabTool',
+    fitColumns: true,
     columns: [[
       { field: 'checkbox', checkbox: true },
       { field: 'companyName', title: $.i18n.prop('MESS_Company_Name') },
       { field: 'devId', title: $.i18n.prop('MESS_Device_ID') },
-      { field: 'VehicleAsset', title: $.i18n.prop('MESS_Vehicle#Asset#') },
+      {
+        field: 'license',
+        title: $.i18n.prop('MESS_Vehicle#Asset#'),
+        formatter: function (value, row, index) {
+          return `<span title="${value}">${ellipsis(value, 15)}</span>`;
+        }
+      },
       {
         field: 'status',
         title: $.i18n.prop('MESS_Status'),
         formatter: function (value, row, index) {
-          return `<span class="">${statusMap[value--]}</span>`;
+          return `<span>${value === '100%' ? 'Done' : (value || '')}</span>`;
         }
       },
       { field: 'upgradingFirmware', title: $.i18n.prop('MESS_UpgradingFW') },
@@ -51,7 +59,7 @@ export function initFOTATable () {
         field: 'lastUpdateTime',
         title: $.i18n.prop('MESS_Last_Update'),
         formatter: function (value, row, index) {
-          return `<span class="">${statusMap[formatDate(value, 'yyyy-MM-dd hh:mm:ss')]}</span>`;
+          return `<span class="">${formatDate(value, 'yyyy-MM-dd hh:mm:ss')}</span>`;
         }
       },
       {
@@ -81,21 +89,39 @@ export function initFOTATable () {
         operatedBy: 39124,
         lastUpdateTime: 1585517040956
       }
-    ]
-    // loader: function (params, success, error) {
-    //   // loadData(params, success, error);
-    // },
-    // onLoadSuccess: function (data) {},
-    // onLoadError: function () {
-    //   console.log('error');
-    //   // $(this).datagrid('loadData', []);
-    // }
+    ],
+    loader: function (params, success, error) {
+      loadData(params, success, error);
+    },
+    onLoadSuccess: function (data) {},
+    onLoadError: function () {
+      console.log('error');
+      // $(this).datagrid('loadData', []);
+    }
   });
+  initSearchBox(table, $('#FOTATabTool'));
   addToolHandle(table);
   const tablePanel = datagrid.tablePanel;
   addOperateHandle(tablePanel, table);
   initFOTAUpgradeDialog(table, FOTAUpgradeDialogBeforeOpen, FOTAUpgradeDialogOpen, FOTAUpgradeConfirmFn, {
     onClose: dialogClose
+  });
+  // init calendar
+  $('#FOTAUpgradeDialog').find('.datePicker').datetimebox({
+    current: new Date(),
+    editable: false
+    // parser: function (data) {
+    //   console.log(data);
+    //   var t = Date.parse(data);
+    //   if (!isNaN(t)) {
+    //     return new Date(t);
+    //   } else {
+    //     return new Date();
+    //   }
+    // },
+    // onSelect: function (data) {
+    //   console.log(data);
+    // }
   });
 }
 
@@ -105,6 +131,12 @@ function initFirmwareVList () {
     if (!res) {
       return false;
     }
+    res = res.map((val) => {
+      return {
+        label: val,
+        value: val
+      };
+    });
     initSelectOptions(res, $('#FTAFormNewFW'), true);
   }).catch(e => {
     console.log(e);
@@ -157,6 +189,11 @@ function initFOTAUpgradeDialog (table, beforeOpenFn, openFn, confirmFn, other) {
 function FOTAUpgradeDialogBeforeOpen (table, dialog) {
   return () => {
     const target = dialog.data('target');
+    const deviceType = deviceTypeMap.filter((val) => {
+      if ($('#FOTAFilter').val() == val.value) {
+        return val;
+      }
+    })[0];
     if (target.indexOf('operate') === -1) {
       dialog.find('.c-form-group').not('[data-scope="batch"]').each(function () {
         const field = $(this).find('.easyui-validatebox');
@@ -169,10 +206,21 @@ function FOTAUpgradeDialogBeforeOpen (table, dialog) {
       }).show();
       const row = dialog.data('row')[0];
       Object.keys(row).forEach(val => {
-        dialog.find(`[name="${val}"]`).val(row[val]);
+        if (val === 'upgradingFirmware') {
+          const upgradeFirmware = row[val] || row.currentFirmware;
+          if (upgradeFirmware) {
+            dialog.find(`[name="upgradeFirmware"]`).find(`option[value="${row[val]}"]`);
+          } else {
+            dialog.find(`[name="upgradeFirmware"]`).find(`option`)[0].click();
+          }
+        } else {
+          dialog.find(`[name="${val}"]`).val(row[val]);
+        }
       });
       dialog.find('form').form('validate');
     }
+    dialog.find(`[name="deviceTypeVal"]`).val(deviceType && deviceType.label);
+    dialog.find(`[name="deviceType"]`).val(deviceType && deviceType.value);
   };
 }
 
@@ -188,18 +236,38 @@ function FOTAUpgradeConfirmFn (table, dialog) {
   const type = dialog.data('target');
   const row = dialog.data('row');
   const validate = form.form('validate');
+  let res;
   if (validate) {
     const data = deserialization(form.serialize());
-    console.log(data);
-    console.log(row);
-    row.forEach(val => {
-      val = Object.assign({}, val, data);
+    res = row.map(val => {
+      const { devId, deviceType } = Object.assign({}, val, data);
+      const upgradingFirmware = data.upgradeFirmware;
+      return {
+        devId,
+        deviceType,
+        upgradingFirmware
+      };
     });
-    console.log(row);
-    // upgrade(row).then(() => {
-    //   dialog.dialog('close');
-    //   table.datagrid('load');
-    // });
+    console.log(res);
+    $.messager.confirm('Confirm', 'Are you sure to upgrade this FOTA?', function (r) {
+      if (r) {
+        loading();
+        upgrade(res).then(() => {
+          mesgTip('success', {
+            msg: 'Upgrade FOTA successful'
+          });
+          dialog.dialog('close');
+          table.datagrid('load');
+        }).catch(e => {
+          console.log(e);
+          mesgTip('error', {
+            msg: 'Upgrade FOTA failed'
+          });
+        }).finally(() => {
+          finish();
+        });
+      }
+    });
   }
 }
 
@@ -211,9 +279,10 @@ function dialogClose (table, dialog) {
 }
 
 function loadData (params, success, error) {
+  const { page, rows } = params;
   const tab = $('.FOTA-tab');
-  const requestUrl = getRequestUrl(getFotaListUrl, tab);
-  return getFotaList(requestUrl).then(res => {
+  const { deviceType, firmwareVersion, companyName } = getInitParams(tab);
+  return getFotaList(deviceType, { firmwareVersion, companyName, offset: page, limit: rows }).then(res => {
     console.log(res);
     success(res);
   }).catch(e => {
@@ -236,7 +305,6 @@ function addOperateHandle (tablePanel, table) {
 }
 
 function addToolHandle (table) {
-  const $this = $(this);
   $('.batch-upgrade').on('click', function () {
     const row = table.datagrid('getChecked');
     if (!row || !row.length) {

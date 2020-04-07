@@ -1,9 +1,21 @@
 .search-box {
   @include h(40);
   display: flex;
-  justify-content: space-between;
   align-items: center;
   //padding: 0 formatVal(10, rem);
+  .c-form-group {
+    margin: 0;
+    align-items: center;
+    & + .c-form-group {
+      margin: 0;
+      margin-left: formatVal(10, rem);
+    }
+    &.filter{
+      .field-name{
+        flex: 1;
+      }
+    }
+  }
 }
 
 .operation-box {
@@ -11,7 +23,11 @@
   display: flex;
   align-items: center;
 }
-.c-tab{display: none;}
+
+.c-tab {
+  display: none;
+}
+
 .FOTA-tab {
   .search-input {
     input {

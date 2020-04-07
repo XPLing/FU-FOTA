@@ -78,6 +78,9 @@ export function mesgTip (type, opts) {
     case 'error':
       errorTip(opts);
       break;
+    case 'success':
+      errorTip(opts);
+      break;
   }
 }
 
@@ -86,6 +89,21 @@ function errorTip (opts) {
     title: 'Error',
     msg: 'System has no response.',
     timeout: 1500,
+    showType: 'fade',
+    style: {
+      right: '',
+      top: '20%',
+      bottom: ''
+    }
+  }, opts);
+  $.messager.show(opts);
+}
+
+function successTip (opts) {
+  opts = Object.assign({}, {
+    title: 'Message',
+    msg: 'Modify successful.',
+    timeout: 1000,
     showType: 'fade',
     style: {
       right: '',
@@ -147,4 +165,11 @@ export function formatDate (timeStamp, fmt) {
 
 function padLeftZero (str) {
   return ('00' + str).substr(str.length);
+}
+
+export function ellipsis (str, limit) {
+  if (str && (str.length > limit)) {
+    str = `${str.substr(0, limit)}...`;
+  }
+  return str;
 }

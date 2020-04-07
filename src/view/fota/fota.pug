@@ -6,16 +6,20 @@ body
     div#FOTATabs
         div.c-tab.FOTA-tab(title="FOTA")
             #FOTATabTool
-                .search-box(data-starget='FOTASearch', data-ftarget='FOTAFilter')
-                    .search-input
-                        input#FOTASearch
-                        div#FOTASearchMenu
-                            div(data-options="name:'Company Name',iconCls:'icon-ok'") Company Name
-                            div(data-options="name:'Firmware Version',iconCls:'icon-ok'") Firmware Version
-                    .filter
-                        label(data-trans-text="MESS_Device_Type")
-                        | ：
-                        input.search-filter#FOTAFilter(name="deviceType", value=2)
+                form.search-box.c-form(data-starget='FOTASearch', data-ftarget='FOTAFilter')
+                    .c-form-group.filter
+                        label.field-name(data-trans-text="MESS_Device_Type")
+                        input.field-cont.search-filter#FOTAFilter(name="deviceType")
+                    .c-form-group
+                        label
+                            span.field-name(data-trans-text="MESS_Company_Name")
+                            input.easyui-textbox.field-cont(data-trans-placeholder="MESS_Input_Value", name="companyName")
+                    .c-form-group
+                        label
+                            span.field-name(data-trans-text="MESS_Firmware_Version")
+                            input.easyui-textbox.field-cont(data-trans-placeholder="MESS_Input_Value", name="firmwareVersion")
+                    .c-form-group
+                        a.easyui-linkbutton.submit-btn#FOTASearch(data-options="iconCls:'icon-search'")
                 .operation-box
                     a.easyui-linkbutton.batch-upgrade(data-options="iconCls:'icon-reload'")
                         span(data-trans-text="MESS_Batch_Upgrade")
@@ -24,33 +28,35 @@ body
                 form.c-form.FOTA-upgrade-form#FOTAUpgradeForm
                     .c-form-group
                         label.field-name(for="FTAFormDevId", data-trans-text="MESS_Device_ID")
-                        input.field-cont.easyui-validatebox(id="FTAFormDevId", name="devId", data-options="required:true")
+                        input.field-cont.easyui-validatebox(id="FTAFormDevId", disabled, name="devId", data-options="required:true")
                     .c-form-group
                         label.field-name(for="FTAFormVehicleOrAsset", data-trans-text="MESS_Vehicle#Asset#")
-                        input.field-cont(id="FTAFormVehicleOrAsset", name="vehicleAsset")
+                        input.field-cont(id="FTAFormVehicleOrAsset", disabled, name="license")
                     .c-form-group(data-scope="batch")
-                        label.field-name(for="FTAFormDeviceType", data-trans-text="MESS_Device_Type")
-                        select.field-cont.easyui-validatebox(id="FTAFormDeviceType", name="deviceType", data-options="required:true")
+                        label.field-name(for="FTAFormDeviceTypeVal", data-trans-text="MESS_Device_Type")
+                        input.field-cont(id="FTAFormDeviceTypeVal", disabled, name="deviceTypeVal")
+                        input.field-cont(id="FTAFormDeviceType", name="deviceType", type="hidden")
                     .c-form-group
                         label.field-name(for="FTAFormCurrentFWV", data-trans-text="MESS_Current_Firmware")
-                        input.field-cont(id="FTAFormCurrentFWV", disabled, value="JT701_20181010_V1.5_M35_SST26_LoRa_UNIVERSAL")
+                        input.field-cont(id="FTAFormCurrentFWV", disabled, name="currentFirmware")
                     .c-form-group(data-scope="batch")
                         label.field-name(for="FTAFormNewFW", data-trans-text="MESS_NewFW")
-                        select.field-cont.easyui-validatebox(id="FTAFormNewFW", name="upgradingFirmware", data-options="required:true")
+                        select.field-cont(id="FTAFormNewFW", name="upgradeFirmware")
                     .c-form-group(data-scope="batch")
                         label.field-name(for="FTAFormExpireDate", data-trans-text="MESS_ExpireDate_Command")
-                        input.field-cont(id="FTAFormExpireDate")
+                        input.field-cont.datePicker(id="FTAFormExpireDate", name="commandExpireDate")
         div.c-tab.firmware-tab(title="Firmware")
             #firmwareTabTool
-                .search-box(data-starget='firmwareSearch', data-ftarget='firmwareFilter')
-                    .search-input
-                        input#firmwareSearch
-                        div#firmwareSearchMenu
-                            div(data-options="name:'Firmware Version',iconCls:'icon-ok'") Firmware Version
-                    .filter
-                        label(data-trans-text="MESS_Device_Type")
-                        | ：
-                        input.search-filter#firmwareFilter(name="deviceType", value=2)
+                form.search-box.c-form(data-starget='firmwareSearch', data-ftarget='firmwareFilter')
+                    .c-form-group.filter
+                        label.field-name(data-trans-text="MESS_Device_Type")
+                        input.field-cont.search-filter#firmwareFilter(name="deviceType")
+                    .c-form-group
+                        label
+                            span.field-name(data-trans-text="MESS_Firmware_Version")
+                            input.easyui-textbox.field-cont(data-trans-placeholder="MESS_Input_Value", name="firmwareVersion")
+                    .c-form-group
+                        a.easyui-linkbutton.submit-btn#firmwareSearch(data-options="iconCls:'icon-search'")
                 .operation-box
                     a.easyui-linkbutton.firmware-new(data-options="iconCls:'icon-add'")
                         span(data-trans-text="MESS_New")
@@ -62,7 +68,7 @@ body
                         select.field-cont#FWFormFirmware(name="firmwareList")
                     .c-form-group
                         label.field-name(data-trans-text="MESS_Device_Type")
-                        .field-cont.fw-dialog-deviceType#FWFormDeviceType(name="deviceType")
+                        .field-cont.fw-dialog-deviceType#FWFormDeviceType
                     .c-form-group
                         label.field-name(for="FWFormFirmwareVersion", data-trans-text="MESS_Firmware_Version")
                         input.field-cont.easyui-validatebox(id="FWFormFirmwareVersion", name="firmwareVersion", data-options="required:true")
@@ -72,6 +78,9 @@ body
                     .c-form-group
                         label.field-name(for="FWFormStage", data-trans-text="MESS_Firmware_Stage")
                         select.field-cont#FWFormStage(name="firmwareStage")
+                            option(value=1, selected) Beta
+                            option(value=2) Release
+                            option(value=3) Specific
                     .c-form-group
                         label.field-name(for="releaseNotes", data-trans-text="MESS_Release_Notes")
                         input.field-cont(id="releaseNotes", name="releaseNotes")
