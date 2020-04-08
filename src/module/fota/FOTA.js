@@ -148,7 +148,10 @@ export function initFOTATable () {
 function initFirmwareVList (deviceType) {
   loading();
   return getFirmwareVersionList(deviceType).then(res => {
-    if (!res) {
+    if (!res || !res.length) {
+      mesgTip('error', {
+        msg: 'This device type has no firmware version!'
+      });
       return false;
     }
     res = res.map((val) => {
