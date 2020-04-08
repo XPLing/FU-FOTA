@@ -90,7 +90,6 @@ class Axios {
           case 505:
             err.message = 'HTTP版本不受支持';
             break;
-
           default:
         }
       }
@@ -98,7 +97,8 @@ class Axios {
       console.log(err.message);
       var errRes = {
         code: err.response ? err.response.status : err.response,
-        message: err.message
+        message: err.response.data,
+        typeMsg: err.message
       };
       if (err.__CANCEL__) {
         errRes.isCancel = true;

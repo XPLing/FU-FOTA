@@ -1,3 +1,29 @@
+.c-input-text {
+  font-size: 14px;
+  margin: 0;
+  padding: 0 4px;
+  white-space: normal;
+  vertical-align: top;
+  outline-style: none;
+  resize: none;
+  border-radius: 5px 5px 5px 5px;
+  height: 28px;
+  line-height: 28px;
+  position: relative;
+  border: 1px solid #95B8E7;
+  background-color: #fff;
+
+  &.validatebox-invalid {
+    border-color: #ffa8a8;
+    background-color: #fff3f3;
+  }
+}
+
+
+.c-form-group {
+  align-items: center;
+}
+
 .search-box {
   @include h(40);
   display: flex;
@@ -6,12 +32,14 @@
   .c-form-group {
     margin: 0;
     align-items: center;
+
     & + .c-form-group {
       margin: 0;
       margin-left: formatVal(10, rem);
     }
-    &.filter{
-      .field-name{
+
+    &.filter {
+      .field-name {
         flex: 1;
       }
     }
@@ -45,6 +73,7 @@
   }
 
   .field-cont {
+    max-width: 70%;
   }
 }
 

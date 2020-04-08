@@ -1,4 +1,13 @@
-import { calculateWH, loading, finish, mesgTip, deserialization, formatDate, ellipsis } from '../common/util';
+import {
+  calculateWH,
+  loading,
+  finish,
+  mesgTip,
+  deserialization,
+  serialization,
+  formatDate,
+  ellipsis
+} from '../common/util';
 import {
   getRequestUrl,
   InitDataGrid,
@@ -8,9 +17,10 @@ import {
   getInitParams,
   initSearchBox
 } from './common';
-import { getFotaListUrl, getFotaList, getFirmwareInfoList, upgradeFota } from 'src/assets/api/index';
+import { getFotaListUrl, getFotaList, getFirmwareVersionList, upgradeFota } from 'src/assets/api/index';
 
 let deviceTypeMap;
+let fwVersion = true;
 
 export function initFOTATable () {
   deviceTypeMap = getDeviceType();
@@ -25,7 +35,13 @@ export function initFOTATable () {
     textField: 'label',
     data: deviceTypeMap,
     value: deviceTypeMap[0].value,
-    onChange: function (newValue, oldValue) {
+    onChange: async function (newValue, oldValue) {
+      const res = await initFirmwareVList(newValue);
+      if (res && res.length) {
+        fwVersion = true;
+      } else {
+        fwVersion = false;
+      }
       table.datagrid('load');
     }
   });
@@ -47,6 +63,7 @@ export function initFOTATable () {
       },
       {
         field: 'status',
+        align: 'center',
         title: $.i18n.prop('MESS_Status'),
         formatter: function (value, row, index) {
           return `<span>${value === '100%' ? 'Done' : (value || '')}</span>`;
@@ -54,7 +71,7 @@ export function initFOTATable () {
       },
       { field: 'upgradingFirmware', title: $.i18n.prop('MESS_UpgradingFW') },
       { field: 'currentFirmware', title: $.i18n.prop('MESS_Current_Firmware') },
-      { field: 'operatedBy', title: $.i18n.prop('MESS_OperatedBy') },
+      { field: 'operatedBy', align: 'center', title: $.i18n.prop('MESS_OperatedBy') },
       {
         field: 'lastUpdateTime',
         title: $.i18n.prop('MESS_Last_Update'),
@@ -64,9 +81,12 @@ export function initFOTATable () {
       },
       {
         field: 'Operation',
+        align: 'center',
         title: $.i18n.prop('MESS_Operation'),
         formatter: function (value, row, index) {
-          return `<span class="c-icon icon-reload operate" title="${$.i18n.prop('MESS_Upgrade')}" data-operate="upgrading" data-index=${index}></span>`;
+          if (fwVersion) {
+            return `<span class="c-icon icon-reload operate" title="${$.i18n.prop('MESS_Upgrade')}" data-operate="upgrading" data-index=${index}></span>`;
+          }
         }
       }
     ]],
@@ -125,24 +145,40 @@ export function initFOTATable () {
   });
 }
 
-function initFirmwareVList () {
+function initFirmwareVList (deviceType) {
   loading();
-  return getFirmwareInfoList().then(res => {
+  return getFirmwareVersionList(deviceType).then(res => {
     if (!res) {
       return false;
     }
     res = res.map((val) => {
       return {
-        label: val,
-        value: val
+        label: val.firmwareVersion,
+        value: val.firmwareVersion
       };
     });
-    initSelectOptions(res, $('#FTAFormNewFW'), true);
+    const ele = $('#FTAFormNewFW');
+    if (ele[0].hasAttribute('comboname')) {
+      ele.combobox('loadData', res);
+    } else {
+      ele.combobox({
+        width: '100%',
+        panelHeight: calculateWH(150),
+        editable: false,
+        valueField: 'value',
+        textField: 'label',
+        data: res,
+        value: res[0].value
+      });
+    }
+    return res;
+    // initSelectOptions(res, $('#FTAFormNewFW'), true);
   }).catch(e => {
     console.log(e);
     mesgTip('error', {
-      msg: 'Get Firmware Version List: load failed'
+      msg: e.message || 'Get Firmware Version List: load failed'
     });
+    return [];
   }).finally(() => {
     finish();
   });
@@ -199,24 +235,14 @@ function FOTAUpgradeDialogBeforeOpen (table, dialog) {
         const field = $(this).find('.easyui-validatebox');
         field.validatebox('disableValidation');
       }).hide();
+      initFOTAInfo(null, dialog);
     } else {
       dialog.find('.c-form-group').not('[data-scope="batch"]').each(function () {
         const field = $(this).find('.easyui-validatebox');
         field.validatebox('enableValidation');
       }).show();
       const row = dialog.data('row')[0];
-      Object.keys(row).forEach(val => {
-        if (val === 'upgradingFirmware') {
-          const upgradeFirmware = row[val] || row.currentFirmware;
-          if (upgradeFirmware) {
-            dialog.find(`[name="upgradeFirmware"]`).find(`option[value="${row[val]}"]`);
-          } else {
-            dialog.find(`[name="upgradeFirmware"]`).find(`option`)[0].click();
-          }
-        } else {
-          dialog.find(`[name="${val}"]`).val(row[val]);
-        }
-      });
+      initFOTAInfo(row, dialog);
       dialog.find('form').form('validate');
     }
     dialog.find(`[name="deviceTypeVal"]`).val(deviceType && deviceType.label);
@@ -224,10 +250,32 @@ function FOTAUpgradeDialogBeforeOpen (table, dialog) {
   };
 }
 
+function initFOTAInfo (row, dialog) {
+  if (!row) {
+    dialog.find('[comboname]').each(function () {
+      const combo = $(this);
+      if (combo.hasClass('datePicker')) {
+        combo.datetimebox('clear');
+      } else {
+        const option = combo.combobox('options');
+        combo.combobox('setValue', option.value);
+      }
+    });
+  } else {
+    Object.keys(row).forEach(val => {
+      dialog.find(`[name="${val}"]`).val(row[val]);
+      const combox = dialog.find(`[comboname="${val}"]`);
+      if (combox[0]) {
+        const option = combox.combobox('options');
+        combox.combobox('setValue', row[val] || option.value);
+      }
+    });
+  }
+}
+
 function FOTAUpgradeDialogOpen (table, dialog) {
   return () => {
     const row = dialog.data('row');
-    console.log(row);
   };
 }
 
@@ -238,10 +286,9 @@ function FOTAUpgradeConfirmFn (table, dialog) {
   const validate = form.form('validate');
   let res;
   if (validate) {
-    const data = deserialization(form.serialize());
+    const data = deserialization(serialization(form));
     res = row.map(val => {
-      const { devId, deviceType } = Object.assign({}, val, data);
-      const upgradingFirmware = data.upgradeFirmware;
+      const { devId, deviceType, upgradingFirmware } = Object.assign({}, val, data);
       return {
         devId,
         deviceType,
@@ -261,7 +308,7 @@ function FOTAUpgradeConfirmFn (table, dialog) {
         }).catch(e => {
           console.log(e);
           mesgTip('error', {
-            msg: 'Upgrade FOTA failed'
+            msg: e.message || 'Upgrade FOTA failed'
           });
         }).finally(() => {
           finish();
@@ -274,7 +321,15 @@ function FOTAUpgradeConfirmFn (table, dialog) {
 function dialogClose (table, dialog) {
   return () => {
     const form = dialog.find('form');
-    form[0].reset();
+    form.find('.c-input-text').val('');
+    form.find('[comboname]').each(function () {
+      const $this = $(this);
+      if ($this.hasClass('datePicker')) {
+        $this.datetimebox('clear');
+      } else {
+        $this.combobox('clear');
+      }
+    });
   };
 }
 
@@ -283,7 +338,6 @@ function loadData (params, success, error) {
   const tab = $('.FOTA-tab');
   const { deviceType, firmwareVersion, companyName } = getInitParams(tab);
   return getFotaList(deviceType, { firmwareVersion, companyName, offset: page, limit: rows }).then(res => {
-    console.log(res);
     success(res);
   }).catch(e => {
     console.log(e);
@@ -316,8 +370,8 @@ function addToolHandle (table) {
 }
 
 function initDialogFirmwareVList (row, _this) {
-  if (!$('#FTAFormNewFW').children('option').length) {
-    initFirmwareVList().then(res => {
+  if (!$('#FTAFormNewFW').siblings('.combo')[0]) {
+    initFirmwareVList($('#FOTAFilter').combobox('getValue')).then(res => {
       $('#FOTAUpgradeDialog').data({ row: row, target: _this.className }).dialog('open');
     });
   } else {

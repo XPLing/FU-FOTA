@@ -1,12 +1,13 @@
 import axios from './axios';
 import Qs from 'qs';
+import { Base64 } from 'js-base64';
 
 const debug = process.env.NODE_ENV === 'development';
-const baseUrl = debug ? '/api' : '';
+const baseUrl = debug ? '/api/operator/admin/fota' : '/operator/admin/fota';
 
 export function getDeviceType (params) {
   // var url = debug ? '/api/operator/load_account_info.json' : `/operator/load_account_info.json`;
-  const url = baseUrl + '/admin/fota/deviceTypes';
+  const url = baseUrl + '/deviceTypes';
   const data = Object.assign({}, {}, params);
   return axios.init({
     url: url,
@@ -20,7 +21,7 @@ export function getDeviceType (params) {
 }
 
 export function getFotaList (deviceType, params) {
-  const url = baseUrl + `/admin/fota/devices/${deviceType}`;
+  const url = baseUrl + `/devices/${deviceType}`;
   const data = Object.assign({}, {}, params);
   return axios.init({
     url: url,
@@ -35,7 +36,7 @@ export function getFotaList (deviceType, params) {
 
 export function upgradeFota (params) {
   // var url = debug ? '/api/operator/load_account_info.json' : `/operator/load_account_info.json`;
-  const url = baseUrl + `/admin/fota/device`;
+  const url = baseUrl + `/device`;
   return axios.init({
     url: url,
     method: 'POST',
@@ -47,8 +48,8 @@ export function upgradeFota (params) {
   });
 }
 
-export function getFirmwareList (firmwareVersion, params) {
-  const url = baseUrl + `/admin/firmware/${firmwareVersion}`;
+export function getFirmwareList (deviceType, params) {
+  const url = baseUrl + `/firmwares/${deviceType}`;
   const data = Object.assign({}, {}, params);
   return axios.init({
     url: url,
@@ -62,7 +63,20 @@ export function getFirmwareList (firmwareVersion, params) {
 }
 
 export function getFirmwareInfoList (params) {
-  const url = baseUrl + '/admin/fota/s3/firmwares';
+  const url = baseUrl + '/firmware-files';
+  const data = Object.assign({}, {}, params);
+  return axios.init({
+    url: url,
+    method: 'GET',
+    params: data
+  }).then((res) => {
+    return Promise.resolve(res.data);
+  }).catch((err) => {
+    return Promise.reject(err);
+  });
+}
+export function getFirmwareVersionList (deviceType, params) {
+  const url = baseUrl + `/firmwares/${deviceType}`;
   const data = Object.assign({}, {}, params);
   return axios.init({
     url: url,
@@ -76,12 +90,12 @@ export function getFirmwareInfoList (params) {
 }
 
 export function creatrFirmware (params) {
-  const url = baseUrl + '/admin/fota/firmware';
+  const url = baseUrl + '/firmware';
   const data = Object.assign({}, {}, params);
   return axios.init({
     url: url,
     method: 'POST',
-    params: data
+    data
   }).then((res) => {
     return Promise.resolve(res.data);
   }).catch((err) => {
@@ -90,7 +104,7 @@ export function creatrFirmware (params) {
 }
 
 export function updateFirmware (firmwareVersion, params) {
-  const url = baseUrl + `/admin/firmware/${firmwareVersion}`;
+  const url = baseUrl + `/firmware/${Base64.encode(firmwareVersion)}`;
   const data = Object.assign({}, {}, params);
   return axios.init({
     url: url,
@@ -103,5 +117,5 @@ export function updateFirmware (firmwareVersion, params) {
   });
 }
 
-export const getFotaListUrl = baseUrl + '/admin/fota/device';
-export const getFirmwareUrl = baseUrl + '/admin/fota/firmwares';
+export const getFotaListUrl = baseUrl + '/device';
+export const getFirmwareUrl = baseUrl + '/firmwares';

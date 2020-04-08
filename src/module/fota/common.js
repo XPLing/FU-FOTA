@@ -1,4 +1,4 @@
-import { deserialization } from '../common/util';
+import { deserialization, serialization } from '../common/util';
 
 export var store = {};
 
@@ -33,7 +33,11 @@ export function getInitParams (scope) {
     return '';
   }
   const searchBox = scope.find('.search-box');
-  const data = deserialization(searchBox.serialize());
+  const deviceType = searchBox.find('.search-filter');
+  const data = deserialization(serialization(searchBox));
+  console.log('serialize');
+  console.log(data);
+  data.deviceType = deviceType.combobox('getValues').join(',');
   return data;
 }
 

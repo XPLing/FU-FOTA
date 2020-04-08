@@ -28,20 +28,20 @@ body
                 form.c-form.FOTA-upgrade-form#FOTAUpgradeForm
                     .c-form-group
                         label.field-name(for="FTAFormDevId", data-trans-text="MESS_Device_ID")
-                        input.field-cont.easyui-validatebox(id="FTAFormDevId", disabled, name="devId", data-options="required:true")
+                        input.field-cont.c-input-text.easyui-validatebox(id="FTAFormDevId", disabled, name="devId", data-options="required:true")
                     .c-form-group
                         label.field-name(for="FTAFormVehicleOrAsset", data-trans-text="MESS_Vehicle#Asset#")
-                        input.field-cont(id="FTAFormVehicleOrAsset", disabled, name="license")
+                        input.field-cont.c-input-text(id="FTAFormVehicleOrAsset", disabled, name="license")
                     .c-form-group(data-scope="batch")
                         label.field-name(for="FTAFormDeviceTypeVal", data-trans-text="MESS_Device_Type")
-                        input.field-cont(id="FTAFormDeviceTypeVal", disabled, name="deviceTypeVal")
+                        input.field-cont.c-input-text(id="FTAFormDeviceTypeVal", disabled, name="deviceTypeVal")
                         input.field-cont(id="FTAFormDeviceType", name="deviceType", type="hidden")
                     .c-form-group
                         label.field-name(for="FTAFormCurrentFWV", data-trans-text="MESS_Current_Firmware")
-                        input.field-cont(id="FTAFormCurrentFWV", disabled, name="currentFirmware")
+                        input.field-cont.c-input-text(id="FTAFormCurrentFWV", disabled, name="currentFirmware")
                     .c-form-group(data-scope="batch")
                         label.field-name(for="FTAFormNewFW", data-trans-text="MESS_NewFW")
-                        select.field-cont(id="FTAFormNewFW", name="upgradeFirmware")
+                        select.field-cont(id="FTAFormNewFW", name="upgradingFirmware")
                     .c-form-group(data-scope="batch")
                         label.field-name(for="FTAFormExpireDate", data-trans-text="MESS_ExpireDate_Command")
                         input.field-cont.datePicker(id="FTAFormExpireDate", name="commandExpireDate")
@@ -71,31 +71,22 @@ body
                         .field-cont.fw-dialog-deviceType#FWFormDeviceType
                     .c-form-group
                         label.field-name(for="FWFormFirmwareVersion", data-trans-text="MESS_Firmware_Version")
-                        input.field-cont.easyui-validatebox(id="FWFormFirmwareVersion", name="firmwareVersion", data-options="required:true")
-                    .c-form-group
-                        label.field-name(for="FWFormDescription", data-trans-text="MESS_Description")
-                        input.field-cont(id="FWFormDescription", name="description")
+                        input.field-cont.c-input-text.easyui-validatebox(id="FWFormFirmwareVersion", name="firmwareVersion", data-options="required:true")
                     .c-form-group
                         label.field-name(for="FWFormStage", data-trans-text="MESS_Firmware_Stage")
                         select.field-cont#FWFormStage(name="firmwareStage")
-                            option(value=1, selected) Beta
-                            option(value=2) Release
-                            option(value=3) Specific
                     .c-form-group
                         label.field-name(for="releaseNotes", data-trans-text="MESS_Release_Notes")
-                        input.field-cont(id="releaseNotes", name="releaseNotes")
+                        input.field-cont.c-input-text(id="releaseNotes", name="description")
                     .c-form-group(data-scope="edit")
                         .field-name(data-trans-text="MESS_File_Size")
-                        .field-cont
+                        input.field-cont.c-input-text(name="fileSize", disabled)
                     .c-form-group(data-scope="edit")
                         .field-name(data-trans-text="MESS_Add_By")
-                        .field-cont
+                        input.field-cont.c-input-text(name="addBy", disabled)
                     .c-form-group(data-scope="edit")
                         label.field-name(for="FWFormStatus", data-trans-text="MESS_Status")
                         select.field-cont(id="FWFormStatus", name="status")
-                            option(value="1") Beta
-                            option(value="2") Release
-                            option(value="3") Specific
             #firmwareExpireDialog
                 p.expire-tip(data-trans-text="MESS_Expire_Confirm_Msg")
     .c-loading

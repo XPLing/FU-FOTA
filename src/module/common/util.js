@@ -92,7 +92,6 @@ function errorTip (opts) {
     showType: 'fade',
     style: {
       right: '',
-      top: '20%',
       bottom: ''
     }
   }, opts);
@@ -107,7 +106,6 @@ function successTip (opts) {
     showType: 'fade',
     style: {
       right: '',
-      top: '20%',
       bottom: ''
     }
   }, opts);
@@ -126,6 +124,10 @@ export function deserialization (data) {
   } else {
     return false;
   }
+}
+
+export function serialization (form) {
+  return form.serialize().replace(/\+/g, ' ');
 }
 
 export function formatDate (timeStamp, fmt) {
