@@ -1,10 +1,18 @@
-import { calculateWH, loading, finish, mesgTip, deserialization, serialization, formatDate } from '../common/util';
+import {
+  calculateWH,
+  loading,
+  finish,
+  mesgTip,
+  deserialization,
+  serialization,
+  formatDate,
+  toTXT,
+  formatSize
+} from '../common/util';
 import {
   getDeviceType,
   InitDataGrid,
-  searchClickHank,
-  initSelectOptions,
-  initCheckboxList, getInitParams, initSearchBox
+  initCheckboxList, getInitParams, initSearchBox, initDialog
 } from './common';
 import {
   getFirmwareList,
@@ -14,7 +22,7 @@ import {
 } from 'src/assets/api/index';
 
 let deviceTypeMap;
-const statusMap = ['In-Use', 'Expired'];
+const statusMap = ['Active', 'Expired'];
 const stageMap = ['Beta', 'Release', 'Specific'];
 
 export function initFirmwareTable () {
@@ -32,7 +40,12 @@ export function initFirmwareTable () {
     data: deviceTypeMap,
     value: deviceTypeMap[0].value,
     onChange: function (newValue, oldValue) {
-      table.datagrid('load');
+      $(this).combobox('hidePanel');
+      if (newValue.length) {
+        table.datagrid('load');
+      } else {
+        $(this).combobox('setValue', oldValue);
+      }
     }
   });
   // table
@@ -73,9 +86,21 @@ export function initFirmwareTable () {
           return `<span class="">${stageMap[--value]}</span>`;
         }
       },
-      { field: 'fileSize', title: $.i18n.prop('MESS_File_Size') },
+      {
+        field: 'fileSize',
+        title: $.i18n.prop('MESS_File_Size'),
+        formatter: function (value, row, index) {
+          return formatSize(value);
+        }
+      },
       { field: 'addBy', title: $.i18n.prop('MESS_Add_By') },
-      { field: 'description', title: $.i18n.prop('MESS_Description') },
+      {
+        field: 'description',
+        title: $.i18n.prop('MESS_Description'),
+        formatter: function (value, row, index) {
+          return toTXT(value);
+        }
+      },
       {
         field: 'status',
         align: 'center',
@@ -103,39 +128,18 @@ export function initFirmwareTable () {
         align: 'center',
         title: $.i18n.prop('MESS_Operation'),
         formatter: function (value, row, index) {
+          let expire = '';
+          if (row.status === 1) {
+            expire = `<span class="c-icon icon-time operate" title="${$.i18n.prop('MESS_Firmware_EditExpireDate')}" data-operate="expire" data-index=${index}></span>`;
+          }
           return `<p class="operation-tool">
                     <span class="c-icon icon-edit operate" title="${$.i18n.prop('MESS_Firmware_Edit')}" data-operate="edit" data-index=${index}></span>
-                    <span class="c-icon icon-download operate" title="${$.i18n.prop('MESS_Firmware_Download')}" data-operate="download" data-index=${index}></span>
-                    <span class="c-icon icon-time operate" title="${$.i18n.prop('MESS_Firmware_EditExpireDate')}" data-operate="expire" data-index=${index}></span>
+                    <a href="${row.firmwarePath}" download="${row.firmwareVersion}" class="c-icon icon-download operate" title="${$.i18n.prop('MESS_Firmware_Download')}" data-operate="download" data-index=${index}></a>
+                    ${expire}
                   </p>`;
         }
       }
     ]],
-    data: [
-      {
-
-        firmwareVersion: 'IDD_213G01_S B2.4.3.2_True_J1939T',
-        deviceType: '3',
-        firmwareStage: 2,
-        fileSize: 222952,
-        addBy: 39124,
-        description: 'IDD_213G01_S B2.4.3.2_True_J1939T',
-        status: 1,
-        createTime: 1585516590393,
-        lastUpdateTime: 1585545445738
-      },
-      {
-        firmwareVersion: 'IDD_213G01_S V2.5.1_True_J1708_20191030_01',
-        deviceType: '3',
-        firmwareStage: 2,
-        fileSize: 225788,
-        addBy: 39124,
-        description: 'IDD_213G01_S V2.5.1_True_J1708_20191030_01',
-        status: 1,
-        createTime: 1585516960108,
-        lastUpdateTime: 1585516960108
-      }
-    ],
     loader: function (params, success, error) {
       loadData(params, success, error);
     },
@@ -152,12 +156,34 @@ export function initFirmwareTable () {
   if (tablePanel[0]) {
     addOperateHandle(tablePanel, table);
   }
-  initDialog(table, dialogBeforeOpen, dialogOpen, dialogConfirmFn, {
-    onClose: dialogClose
+  initDialog($('#firmwareDialog'), table, {
+    title: $.i18n.prop('MESS_Create_Firmware'),
+    onClose: dialogClose,
+    onBeforeOpen: dialogBeforeOpen,
+    onOpen: dialogOpen,
+    confirmFn: dialogConfirmFn
   });
-  initExpireDialog(table, expireConfirmFn);
+  // Expire Dialog
+  initDialog($('#firmwareExpireDialog'), table, {
+    width: calculateWH(400),
+    height: calculateWH(150),
+    title: $.i18n.prop('MESS_Confirm'),
+    buttonsOpts: [
+      {
+        text: 'Ok',
+        iconCls: 'icon-ok'
+      },
+      {
+        text: 'Cancel',
+        iconCls: 'icon-no'
+      }
+    ],
+    confirmFn: expireDialogConfirmFn
+  });
+  // initExpireDialog(table, expireConfirmFn);
+  // init dialog Stage and Status dropdown menu
   initDialogCombox(stageMap, $('#FWFormStage'));
-  initDialogCombox(statusMap, $('#FWFormStatus'), 400, 60);
+  // initDialogCombox(statusMap, $('#FWFormStatus'), 400, 60);
 }
 
 function initFirmwareVList () {
@@ -243,47 +269,11 @@ function initExpireDialog (table, confirmFn, other) {
   dialog.dialog(opts);
 }
 
-function initDialog (table, beforeOpenFn, openFn, confirmFn, other) {
-  const dialog = $('#firmwareDialog');
-  dialog.find('form').form();
-  if (other) {
-    Object.keys(other).forEach(key => {
-      if (Object.prototype.toString.apply(other[key]).indexOf('Function') !== -1) {
-        other[key] = other[key](table, dialog);
-      }
-    });
-  }
-  const opts = Object.assign({}, {
-    title: $.i18n.prop('MESS_Create_Firmware'),
-    width: calculateWH(500),
-    height: calculateWH(350),
-    closed: true,
-    cache: false,
-    modal: true,
-    onBeforeOpen: beforeOpenFn(table, dialog),
-    onOpen: openFn(table, dialog),
-    buttons: [
-      {
-        text: 'Submit',
-        handler: function () {
-          confirmFn && confirmFn(table, dialog);
-        }
-      },
-      {
-        text: 'Cancel',
-        handler: function () {
-          dialog.dialog('close');
-        }
-      }
-    ]
-  }, other);
-  dialog.dialog(opts);
-}
-
 function dialogBeforeOpen (table, dialog) {
   return () => {
     const target = dialog.data('target');
     let title;
+    const firmwareLocation = dialog.find(`[name="firmwareLocation"]`);
     if (target.indexOf('operate') === -1) {
       dialog.find('.c-form-group').filter('[data-scope="edit"]').each(function () {
         const field = $(this).find('.easyui-validatebox');
@@ -291,6 +281,7 @@ function dialogBeforeOpen (table, dialog) {
       }).hide();
       title = $.i18n.prop('MESS_Create_Firmware');
       initFirmwareInfo(null, dialog);
+      firmwareLocation.removeAttr('disabled');
     } else {
       dialog.find('.c-form-group').filter('[data-scope="edit"]').each(function () {
         const field = $(this).find('.easyui-validatebox');
@@ -299,6 +290,7 @@ function dialogBeforeOpen (table, dialog) {
       title = $.i18n.prop('MESS_Edit_Firmware');
       const row = dialog.data('row');
       initFirmwareInfo(row, dialog);
+      firmwareLocation.attr('disabled', true);
       dialog.find('form').form('validate');
     }
     dialog.dialog('setTitle', title);
@@ -315,7 +307,6 @@ function dialogConfirmFn (table, dialog) {
   const form = dialog.find('form');
   const type = dialog.data('target');
   const row = dialog.data('row');
-  const validate = form.form('validate');
   const deviceTypeCheckbox = form.find('[type="checkbox"][name="deviceType"]');
   const deviceTypes = [];
   deviceTypeCheckbox.each(function () {
@@ -329,18 +320,18 @@ function dialogConfirmFn (table, dialog) {
     });
     return false;
   }
+  const validate = form.form('validate');
   if (validate) {
     const data = deserialization(serialization(form));
     data.deviceType = deviceTypes.join(',');
-    const { deviceType, firmwareStage, description, addBy, firmwareVersion, status, firmwareList: firmware } = Object.assign({}, row, data);
+    const { deviceType, firmwareStage, description, firmwareId, firmwareVersion, status, firmwareLocation } = Object.assign({}, row, data);
     let promise;
     if (type.indexOf('operate') !== -1) {
-      promise = updateHandle(firmwareVersion, {
-        deviceType,
+      promise = updateHandle(firmwareId, {
+        firmwareVersion,
         firmwareStage,
         description,
         deviceTypes: deviceType,
-        firmware,
         status
       });
     } else {
@@ -349,7 +340,7 @@ function dialogConfirmFn (table, dialog) {
         deviceTypes: deviceType,
         firmwareStage,
         description,
-        firmware
+        firmwareLocation
       });
     }
     loading();
@@ -365,6 +356,30 @@ function dialogConfirmFn (table, dialog) {
       finish();
     });
   }
+}
+
+function expireDialogConfirmFn (table, dialog) {
+  const form = dialog.find('form');
+  const row = dialog.data('row');
+  const { deviceTypes, firmwareStage, description, firmwareId, firmwareVersion } = row;
+  loading();
+  updateHandle(firmwareId, {
+    firmwareVersion,
+    firmwareStage,
+    description,
+    deviceTypes: deviceTypes.join(','),
+    status: 2
+  }).then(() => {
+    dialog.dialog('close');
+    table.datagrid('load');
+  }).catch(e => {
+    console.log(e);
+    mesgTip('error', {
+      msg: e.message || 'Operate failed!'
+    });
+  }).finally(() => {
+    finish();
+  });
 }
 
 function dialogClose (table, dialog) {
@@ -400,13 +415,13 @@ function addOperateHandle (tablePanel, table) {
     const $this = $(this), type = $this.data('operate');
     const row = table.datagrid('getRows')[$this.data('index')];
     if (type === 'edit') {
-      if (!$('#FWFormFirmware').siblings('.combo')[0]) {
-        initFirmwareVList().then(res => {
-          $('#firmwareDialog').data({ row: row, target: this.className }).dialog('open');
-        });
-      } else {
-        $('#firmwareDialog').data({ row: row, target: this.className }).dialog('open');
-      }
+      // if (!$('#FWFormFirmware').siblings('.combo')[0]) {
+      //   initFirmwareVList().then(res => {
+      //     $('#firmwareDialog').data({ row: row, target: this.className }).dialog('open');
+      //   });
+      // } else {
+      // }
+      $('#firmwareDialog').data({ row: row, target: this.className }).dialog('open');
     } else if (type === 'expire') {
       $('#firmwareExpireDialog').data({ row: row }).dialog('open');
     }
@@ -416,18 +431,19 @@ function addOperateHandle (tablePanel, table) {
 function addToolHandle (table) {
   $('.firmware-new').on('click', function () {
     const $this = $(this);
-    if (!$('#FWFormFirmware').siblings('.combo')[0]) {
-      initFirmwareVList().then(res => {
-        $('#firmwareDialog').data({ target: $this.attr('class') }).dialog('open');
-      });
-    } else {
-      $('#firmwareDialog').data({ target: $this.attr('class') }).dialog('open');
-    }
+    // if (!$('#FWFormFirmware').siblings('.combo')[0]) {
+    //   initFirmwareVList().then(res => {
+    //     $('#firmwareDialog').data({ target: $this.attr('class') }).dialog('open');
+    //   });
+    // } else {
+    //
+    // }
+    $('#firmwareDialog').data({ target: $this.attr('class') }).dialog('open');
   });
 }
 
-function updateHandle (fwVersion, params) {
-  return updateFirmware(fwVersion, params).then(res => {
+function updateHandle (fwId, params) {
+  return updateFirmware(fwId, params).then(res => {
     mesgTip('success', {
       msg: 'Update Firmware successful'
     });
@@ -451,7 +467,11 @@ function initFirmwareInfo (row, dialog) {
     });
   } else {
     Object.keys(row).forEach(val => {
-      dialog.find(`[name="${val}"]`).val(row[val]);
+      let displayVal = row[val];
+      if (val === 'status') {
+        displayVal = statusMap[row[val] - 1];
+      }
+      dialog.find(`[name="${val}"]`).val(displayVal);
       const combox = dialog.find(`[comboname="${val}"]`);
       if (combox[0]) {
         const option = combox.combobox('options');
@@ -468,8 +488,10 @@ function initFirmwareInfo (row, dialog) {
         }
       });
     }
-    const firmware = dialog.find(`[comboname="firmwareList"]`);
-    const firmwareOption = firmware.combobox('options');
-    firmware.combobox('setValue', firmwareOption.value);
+    // const firmware = dialog.find(`[comboname="firmwareLocation"]`);
+    // const firmwareOption = firmware.combobox('options');
+    // firmware.combobox('setValue', firmwareOption.value);
   }
 }
+
+

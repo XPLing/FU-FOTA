@@ -1,4 +1,4 @@
-import { deserialization, serialization } from '../common/util';
+import { calculateWH, deserialization, serialization, isType } from '../common/util';
 
 export var store = {};
 
@@ -131,4 +131,44 @@ export function initSearchBox (table, searchbox) {
   searchbox.find('.submit-btn').on('click', function (e) {
     table.datagrid('load');
   });
+}
+
+export function initDialog (dialog, table, other) {
+  if (!dialog) {
+    return false;
+  }
+  dialog.find('form').form();
+  if (other) {
+    Object.keys(other).forEach(key => {
+      if (/^on/.test(key) && isType(other[key], 'Function')) {
+        other[key] = other[key](table, dialog);
+      }
+    });
+  }
+  const opts = Object.assign({}, {
+    title: $.i18n.prop('MESS_Create_Firmware'),
+    width: calculateWH(500),
+    height: calculateWH(350),
+    closed: true,
+    cache: false,
+    modal: true,
+    buttons: [
+      {
+        text: (other.buttonsOpts && other.buttonsOpts[0].text) || 'Submit',
+        iconCls: (other.buttonsOpts && other.buttonsOpts[0].iconCls) || '',
+        handler: function () {
+          other.confirmFn && other.confirmFn(table, dialog);
+        }
+      },
+      {
+        text: (other.buttonsOpts && other.buttonsOpts[1].text) || 'Cancel',
+        iconCls: (other.buttonsOpts && other.buttonsOpts[1].iconCls) || '',
+        handler: function () {
+          other.cancelFn && other.cancelFn(table, dialog);
+          dialog.dialog('close');
+        }
+      }
+    ]
+  }, other);
+  dialog.dialog(opts);
 }

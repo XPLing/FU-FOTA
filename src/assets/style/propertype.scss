@@ -57,9 +57,19 @@
   }
 }
 
-
-
-
+.c-dot {
+  display: inline-block;
+  height: 1em;
+  line-height: 1;
+  vertical-align: -.25em;
+  overflow: hidden;
+  &:after{
+    display: block;
+    white-space: pre-wrap;
+    content: '...\A..\A.';
+    animation: dot 3s infinite step-start both;
+  }
+}
 
 
 

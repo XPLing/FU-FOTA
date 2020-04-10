@@ -15,7 +15,7 @@ function getLanguage (langVal) {
  * @param langVal 语言值
  * @param opt 其他i18n配置
  */
-export function loadProperties ($, langVal = 0, opt) {
+export function loadProperties (langVal = 0, opt) {
   const lang = getLanguage(langVal);
   const opts = Object.assign({}, {
     name: 'message',
@@ -65,12 +65,115 @@ export function calculateWH (num) {
   return num / baseConfig.originWidth * windowW;
 }
 
-export function loading (load = $('.c-loading'), msg = 'loading...') {
-  load.addClass('active').find('.panel-loading').html(msg);
+class Loading {
+  constructor (ele, opts) {
+    this.options = Object.assign({}, new.target.DEFAULT, opts);
+    this.$ele = ele;
+    this.init();
+  }
+
+  init () {
+    this.$ele.data('load-id', Loading.COLLECTORINDEX);
+    this.putData(this);
+  }
+
+  setOption (opts) {
+    this.options = Object.assign({}, this.options, opts);
+  }
+
+  show () {
+    const style = {
+      'background-color': `rgba(${colorRgb(this.options.bgColor)},${this.options.opacity})`
+    };
+    if (this.options.opacity === 1) {
+      style.top = this.options.top;
+    }
+    if (this.options.msg) {
+      this.$ele.find('.panel-loading').html(this.options.msg);
+    }
+    this.$ele.addClass('active').css(style);
+  }
+
+  hide () {
+    this.options.opacity = Loading.DEFAULT.opacity;
+    this.options.msg = Loading.DEFAULT.msg;
+    const style = {
+      'background-color': `rgba(${colorRgb(this.options.bgColor)},${Loading.DEFAULT.opacity})`,
+      top: 0
+    };
+    this.$ele.removeClass('active').css(style);
+  }
+
+  dispatch (event, ...arg) {
+    this[event](...arg);
+  }
+
+  getData () {
+    const id = this.$ele.data('load-id');
+    let data;
+    for (let i = 0, len = Loading.COLLECTOR.length; i < len; i++) {
+      const item = Loading.COLLECTOR[i];
+      if (item.id === id) {
+        data = item;
+        break;
+      }
+    }
+    return data;
+  }
+
+  putData (instance) {
+    Loading.COLLECTOR.push({
+      id: Loading.COLLECTORINDEX,
+      data: instance
+    });
+    Loading.COLLECTORINDEX++;
+  }
 }
 
-export function finish (load = $('.c-loading')) {
-  load.removeClass('active');
+Loading.DEFAULT = {
+  ele: $('.c-loading'),
+  opacity: 0.5,
+  bgColor: '#fff',
+  top: '33px',
+  msg: 'loading<em class="c-dot"></em>'
+};
+Loading.COLLECTOR = [];
+Loading.COLLECTORINDEX = 1;
+Loading.INIT = (ele, opts) => {
+  let hasInstance = Loading.GETDATA(ele, opts);
+  if (!hasInstance) {
+    hasInstance = new Loading(ele, opts);
+  } else {
+    if (Object.prototype.toString.apply(ele).indexOf('String') !== -1) {
+      hasInstance.dispatch(ele, opts);
+    }
+  }
+  return hasInstance;
+};
+Loading.GETDATA = (ele, opts) => {
+  if (!(ele instanceof $)) {
+    ele = (opts && opts.ele) || Loading.DEFAULT.ele;
+  }
+  const id = ele.data('load-id');
+  let data;
+  for (let i = 0, len = Loading.COLLECTOR.length; i < len; i++) {
+    const item = Loading.COLLECTOR[i];
+    if (item.id === id) {
+      data = item;
+      break;
+    }
+  }
+  return data && data.data;
+};
+
+export function loading (load = $('.c-loading'), ...arg) {
+  const instance = Loading.INIT(load, ...arg);
+  instance.show();
+}
+
+export function finish (load = $('.c-loading'), ...arg) {
+  const instance = Loading.INIT(load, ...arg);
+  instance.hide();
 }
 
 export function mesgTip (type, opts) {
@@ -79,7 +182,7 @@ export function mesgTip (type, opts) {
       errorTip(opts);
       break;
     case 'success':
-      errorTip(opts);
+      successTip(opts);
       break;
   }
 }
@@ -114,7 +217,7 @@ function successTip (opts) {
 
 export function deserialization (data) {
   const res = {};
-  data = data.split('&');
+  data = decodeURIComponent(data).split('&');
   if (data && data.length) {
     data.forEach(val => {
       const item = val.split('=');
@@ -175,3 +278,77 @@ export function ellipsis (str, limit) {
   }
   return str;
 }
+
+// HTML 转字符串
+export function toTXT (str) {
+  if (!str) {
+    return '';
+  }
+  // eslint-disable-next-line no-useless-escape
+  var RexStr = /\<|\>|\"|\'|\&|　| /g;
+  str = str.replace(RexStr,
+    function (MatchStr) {
+      switch (MatchStr) {
+        case '<':
+          return '&lt;';
+        case '>':
+          return '&gt;';
+        case '"':
+          return '&quot;';
+        case '\'':
+          return '&#39;';
+        case '&':
+          return '&amp;';
+        case ' ':
+          return '&ensp;';
+        case '　':
+          return '&emsp;';
+        default:
+          return '';
+      }
+    }
+  );
+  return str;
+}
+
+// 16进制转换为RGB
+function colorRgb (str) {
+  // 16进制颜色值的正则
+  var reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
+  // 把颜色值变成小写
+  var color = str.toLowerCase();
+  if (reg.test(color)) {
+    // 如果只有三位的值，需变成六位，如：#fff => #ffffff
+    if (color.length === 4) {
+      var colorNew = '#';
+      for (let i = 1; i < 4; i += 1) {
+        colorNew += color.slice(i, i + 1).concat(color.slice(i, i + 1));
+      }
+      color = colorNew;
+    }
+    // 处理六位的颜色值，转为RGB
+    var colorChange = [];
+    for (let i = 1; i < 7; i += 2) {
+      colorChange.push(parseInt('0x' + color.slice(i, i + 2)));
+    }
+    return colorChange.join(',');
+  } else {
+    return color;
+  }
+}
+
+// 校验对象的类型
+export function isType (target, type) {
+  if (type) {
+    type = type.toLocaleLowerCase();
+  }
+  return Object.prototype.toString.apply(target).toLocaleLowerCase().indexOf(type) !== -1;
+}
+
+// 文件大小格式化
+export function formatSize (bytes) {
+  var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  if (!bytes) return 0;
+  var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+  return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
+};

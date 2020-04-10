@@ -17,7 +17,7 @@ body
                     .c-form-group
                         label
                             span.field-name(data-trans-text="MESS_Firmware_Version")
-                            input.easyui-textbox.field-cont(data-trans-placeholder="MESS_Input_Value", name="firmwareVersion")
+                            input.easyui-textbox.field-cont(data-trans-placeholder="MESS_Input_Value", name="firmwareVersion", data-options="width:'350px'")
                     .c-form-group
                         a.easyui-linkbutton.submit-btn#FOTASearch(data-options="iconCls:'icon-search'")
                 .operation-box
@@ -54,7 +54,7 @@ body
                     .c-form-group
                         label
                             span.field-name(data-trans-text="MESS_Firmware_Version")
-                            input.easyui-textbox.field-cont(data-trans-placeholder="MESS_Input_Value", name="firmwareVersion")
+                            input.easyui-textbox.field-cont(data-trans-placeholder="MESS_Input_Value", name="firmwareVersion", data-options="width:'350px'")
                     .c-form-group
                         a.easyui-linkbutton.submit-btn#firmwareSearch(data-options="iconCls:'icon-search'")
                 .operation-box
@@ -64,8 +64,8 @@ body
             .firmware-dialog#firmwareDialog
                 form.c-form.firmware-form#firmwareForm
                     .c-form-group
-                        label.field-name(for="FWFormFirmware", data-trans-text="MESS_Firmware")
-                        select.field-cont#FWFormFirmware(name="firmwareList")
+                        label.field-name(for="FWFormFirmware", data-trans-text="MESS_FirmwareLocation")
+                        input.field-cont.c-input-text#FWFormFirmware(name="firmwareLocation")
                     .c-form-group
                         label.field-name(data-trans-text="MESS_Device_Type")
                         .field-cont.fw-dialog-deviceType#FWFormDeviceType
@@ -77,19 +77,21 @@ body
                         select.field-cont#FWFormStage(name="firmwareStage")
                     .c-form-group
                         label.field-name(for="releaseNotes", data-trans-text="MESS_Release_Notes")
-                        input.field-cont.c-input-text(id="releaseNotes", name="description")
+                        textarea.field-cont.c-input-text.c-input-textarea.easyui-validatebox(id="releaseNotes", name="description", data-options="required:true")
                     .c-form-group(data-scope="edit")
-                        .field-name(data-trans-text="MESS_File_Size")
+                        .field-name
+                            span(data-trans-text="MESS_File_Size")
                         input.field-cont.c-input-text(name="fileSize", disabled)
                     .c-form-group(data-scope="edit")
                         .field-name(data-trans-text="MESS_Add_By")
                         input.field-cont.c-input-text(name="addBy", disabled)
                     .c-form-group(data-scope="edit")
                         label.field-name(for="FWFormStatus", data-trans-text="MESS_Status")
-                        select.field-cont(id="FWFormStatus", name="status")
+                        input.field-contt.c-input-text(id="FWFormStatus", name="status", disabled)
             #firmwareExpireDialog
                 p.expire-tip(data-trans-text="MESS_Expire_Confirm_Msg")
     .c-loading
         .cont
-            .panel-loading loading...
+            .panel-loading loading
+                em.c-dot
 

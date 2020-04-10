@@ -1,6 +1,5 @@
 import axios from './axios';
 import Qs from 'qs';
-import { Base64 } from 'js-base64';
 
 const debug = process.env.NODE_ENV === 'development';
 const baseUrl = debug ? '/api/operator/admin/fota' : '/operator/admin/fota';
@@ -49,7 +48,7 @@ export function upgradeFota (params) {
 }
 
 export function getFirmwareList (deviceType, params) {
-  const url = baseUrl + `/firmwares/${deviceType}`;
+  const url = baseUrl + `/firmwares-page/${deviceType}`;
   const data = Object.assign({}, {}, params);
   return axios.init({
     url: url,
@@ -103,8 +102,8 @@ export function creatrFirmware (params) {
   });
 }
 
-export function updateFirmware (firmwareVersion, params) {
-  const url = baseUrl + `/firmware/${Base64.encode(firmwareVersion)}`;
+export function updateFirmware (firmwareId, params) {
+  const url = baseUrl + `/firmware/${firmwareId}`;
   const data = Object.assign({}, {}, params);
   return axios.init({
     url: url,

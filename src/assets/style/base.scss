@@ -31,18 +31,6 @@ button{
   border: none;
   outline: none;
 }
-.btn{
-    /*padding: 0 formatVal(12,rem);
-    @include h(32);
-    @include lh(32);*/
-}
-.g-container{
-    width: 100%;
-    margin: 0 auto;
-    &.w1200{
-        max-width: 1183px;
-    }
-}
 /*::-webkit-scrollbar {!*滚动条整体样式*!
     width: 8px;     !*高宽分别对应横竖滚动条的尺寸*!
     height: 8px;
@@ -51,20 +39,6 @@ button{
     border-radius: 10px;
     background: #BFBFBF;
 }*/
-.nano {
-    > {
-        .nano-content {
-            padding: 0 0 5px 0;
-        }
-        .nano-pane {
-            width: 5px;
-            background: transparent;
-            > .nano-slider {
-                background: $borderColor;
-            }
-        }
-    }
-}
 ::-webkit-scrollbar { /*滚动条整体样式*/
   width: 8px; /*高宽分别对应横竖滚动条的尺寸*/
   height: 8px;

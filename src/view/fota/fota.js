@@ -7,34 +7,32 @@ import '1i8n';
 import 'assets/style/common';
 import './fota.scss';
 import { loading, finish, loadProperties, mesgTip } from 'src/module/common/util';
-import { initFOTATable } from 'src/module/fota/FOTA';
 import { store } from 'src/module/fota/common';
-import { initFirmwareTable } from 'src/module/fota/firmware';
-import { getDeviceType, getFotaList } from 'src/assets/api/index';
+// import { initFirmwareTable } from 'src/module/fota/firmware';
+import { getDeviceType } from 'src/assets/api/index';
 
+let systemLanguage = 0;
 $(function () {
   init();
-  loadProperties($);
+  loadProperties(systemLanguage);
   loading();
   getDeviceType().then((res) => {
     store.deviceType = res;
     initTabs();
   }).catch(e => {
     console.log(e);
-    mesgTip('error', {
-      msg: $.i18n.prop('MESS_DeviceType_errorMsg')
-    });
-  }).finally(() => {
+    // mesgTip('error', {
+    //   msg: $.i18n.prop('MESS_DeviceType_errorMsg')
+    // });
     finish();
   });
 
 });
 
 function init () {
-  if (window.parent) {
-    // set parent frame nav active status
-    // console.log(window.parent.changeTopFrameBarStyle);
-    // window.parent.changeTopFrameBarStyle && window.parent.changeTopFrameBarStyle('FOTATD');
+  const OPTESTLan = localStorage.getItem('OPTEST_LAN');
+  if (OPTESTLan) {
+    systemLanguage = (~~OPTESTLan) - 1;
   }
 }
 
@@ -49,10 +47,27 @@ function initTabs () {
         tab.data('first', 1);
         switch (index) {
           case 0: // FOTA
-            initFOTATable();
+            loading('setOption', {
+              opacity: 1
+            });
+            import(/* webpackChunkName: "FOTAModule" */'src/module/fota/FOTA').then(({ initFOTATable }) => {
+              initFOTATable();
+            }).finally(e => {
+              finish();
+            });
             break;
           case 1: // firmware
-            initFirmwareTable();
+            loading('setOption', {
+              opacity: 1
+            });
+            import(/* webpackChunkName: "firmwareModule" */'src/module/fota/firmware').then(({ initFirmwareTable }) => {
+              initFirmwareTable();
+            }).finally(e => {
+              finish();
+            });
+            break;
+          default:
+            finish();
             break;
         }
       }
@@ -60,3 +75,12 @@ function initTabs () {
   });
 }
 
+window.addEventListener('message', (event) => {
+  const data = event.data;
+  if (data) {
+    if (data.language) {
+      systemLanguage = data.language - 1;
+      loadProperties(data.language);
+    }
+  }
+});
