@@ -6,7 +6,7 @@ body
     div#FOTATabs
         div.c-tab.FOTA-tab(title="FOTA")
             #FOTATabTool
-                form.search-box.c-form(data-starget='FOTASearch', data-ftarget='FOTAFilter')
+                form.search-box.c-form.FOTA-filter-from(data-starget='FOTASearch', data-ftarget='FOTAFilter')
                     .c-form-group.filter
                         label.field-name(data-trans-text="MESS_Device_Type")
                         input.field-cont.search-filter#FOTAFilter(name="deviceType")
@@ -24,7 +24,7 @@ body
                     a.easyui-linkbutton.batch-upgrade(data-options="iconCls:'icon-reload'")
                         span(data-trans-text="MESS_Batch_Upgrade")
             table.easyui-datagrid.FOTA-table#FOTATable
-            #FOTAUpgradeDialog
+            #FOTAUpgradeDialog.FOTA-dialog
                 form.c-form.FOTA-upgrade-form#FOTAUpgradeForm
                     .c-form-group
                         label.field-name(for="FTAFormDevId", data-trans-text="MESS_Device_ID")
@@ -47,10 +47,10 @@ body
                         input.field-cont.datePicker(id="FTAFormExpireDate", name="commandExpireDate")
         div.c-tab.firmware-tab(title="Firmware")
             #firmwareTabTool
-                form.search-box.c-form(data-starget='firmwareSearch', data-ftarget='firmwareFilter')
+                form.search-box.c-form.firmware-filter-form(data-starget='firmwareSearch', data-ftarget='firmwareFilter')
                     .c-form-group.filter
                         label.field-name(data-trans-text="MESS_Device_Type")
-                        input.field-cont.search-filter#firmwareFilter(name="deviceType")
+                        .field-cont.search-filter#firmwareFilter
                     .c-form-group
                         label
                             span.field-name(data-trans-text="MESS_Firmware_Version")

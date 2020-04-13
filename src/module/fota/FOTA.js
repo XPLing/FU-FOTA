@@ -18,12 +18,23 @@ import { getFotaList, getFirmwareVersionList, upgradeFota } from 'src/assets/api
 
 let deviceTypeMap;
 let fwVersion = true;
+var originCheckAll = $.fn.datagrid.methods.checkAll;
 
+$.fn.datagrid.methods = $.extend({}, $.fn.datagrid.methods, {
+  checkAll: function (...arg) {
+    console.log(...arg);
+    // var res = originCheckAll.call(originView, ...arg);
+    // console.log(...arg);
+    // var _817 = $.data(_815, 'datagrid');
+    // var opts = _817.options;
+    // var rows = opts.finder.getRows(_815);
+  }
+});
 export function initFOTATable () {
   deviceTypeMap = getDeviceType();
+  console.log($.fn.datagrid.methods);
   // initSelectOptions(deviceTypeMap, $('#FTAFormDeviceType'), true);
   const table = $('#FOTATable'), search = $('#FOTASearch'), tab = $('.FOTA-tab');
-
   $('#FOTAFilter').combobox({
     width: calculateWH(100),
     panelHeight: calculateWH(150),
@@ -56,7 +67,8 @@ export function initFOTATable () {
         field: 'license',
         title: $.i18n.prop('MESS_Vehicle#Asset#'),
         formatter: function (value, row, index) {
-          return `<span title="${value}">${ellipsis(value, 15)}</span>`;
+          const vals = value ? ellipsis(value, 15) : 'N/A';
+          return `<span title="${vals}"></span>`;
         }
       },
       {
@@ -69,7 +81,7 @@ export function initFOTATable () {
       },
       { field: 'upgradingFirmware', title: $.i18n.prop('MESS_UpgradingFW') },
       { field: 'currentFirmware', title: $.i18n.prop('MESS_Current_Firmware') },
-      { field: 'operatedBy', align: 'center', title: $.i18n.prop('MESS_OperatedBy') },
+      { field: 'operatorName', align: 'center', title: $.i18n.prop('MESS_OperatedBy') },
       {
         field: 'lastUpdateTime',
         title: $.i18n.prop('MESS_Last_Update'),
@@ -83,20 +95,27 @@ export function initFOTATable () {
         title: $.i18n.prop('MESS_Operation'),
         formatter: function (value, row, index) {
           if (fwVersion) {
+            let operationStatus = 'disable';
             if (row.status !== 0) {
-              return `<span class="c-icon icon-reload operate" title="${$.i18n.prop('MESS_Upgrade')}" data-operate="upgrading" data-index=${index}></span>`;
+              operationStatus = '';
             }
+            return `<span class="c-icon icon-reload operate ${operationStatus}" title="${$.i18n.prop('MESS_Upgrade')}" data-operate="upgrading" data-index=${index}></span>`;
           }
         }
       }
     ]],
+    rowStyler: function (index, row) {
+      if (fwVersion && row.status === 0) {
+        return 'background-color:#eee;';
+      }
+    },
     onCheck: function (rowIndex, rowData) {
-      if (rowData.status === 0) {
+      if (rowData.status === 0 || !fwVersion) {
         $(this).datagrid('uncheckRow', rowIndex);
       }
     },
     onSelect: function (rowIndex, rowData) {
-      if (rowData.status === 0) {
+      if (rowData.status === 0 || !fwVersion) {
         $(this).datagrid('unselectRow', rowIndex);
       }
     },
@@ -143,9 +162,9 @@ function initFirmwareVList (deviceType) {
   loading();
   return getFirmwareVersionList(deviceType).then(res => {
     if (!res || !res.length) {
-      mesgTip('error', {
-        msg: 'This device type has no firmware version!'
-      });
+      // mesgTip('error', {
+      //   msg: 'This device type has no firmware version!'
+      // });
       return false;
     }
     res = res.map((val) => {
@@ -331,6 +350,9 @@ function addOperateHandle (tablePanel, table) {
   tablePanel.on('click', '[data-operate]', function () {
     const $this = $(this), type = $this.data('operate');
     if (type === 'upgrading') {
+      if ($this.hasClass('disable')) {
+        return false;
+      }
       const row = table.datagrid('getRows')[$this.data('index')];
       initDialogFirmwareVList([row], this);
     }
@@ -339,18 +361,14 @@ function addOperateHandle (tablePanel, table) {
 
 function addToolHandle (table) {
   $('.batch-upgrade').on('click', function () {
-    const row = table.datagrid('getChecked');
+    let row = table.datagrid('getChecked');
+    row = row.filter((val) => {
+      return val.status !== 0;
+    });
     if (!row || !row.length) {
       $.messager.alert('Warning', $.i18n.prop('MESS_CheckMultiple_ErrorMsg'));
       return false;
     }
-    // row = row.filter((val) => {
-    //   return val.status !== 0;
-    // });
-    // if (!row || !row.length) {
-    //   $.messager.alert('Warning', $.i18n.prop('MESS_DisableCheck_TipMsg'));
-    //   return false;
-    // }
     initDialogFirmwareVList(row, this);
   });
 }

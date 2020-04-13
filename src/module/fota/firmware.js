@@ -27,27 +27,39 @@ const stageMap = ['Beta', 'Release', 'Specific'];
 
 export function initFirmwareTable () {
   deviceTypeMap = getDeviceType();
-  initCheckboxList(deviceTypeMap, $('#FWFormDeviceType'), 'deviceType');
+
   const table = $('#firmwareTable'), search = $('#firmwareSearch'), tab = $('.firmware-tab');
+  initCheckboxList(deviceTypeMap, $('#FWFormDeviceType'), 'deviceType');
   // device type filter
-  $('#firmwareFilter').combobox({
-    width: calculateWH(100),
-    panelHeight: calculateWH(150),
-    editable: false,
-    valueField: 'value',
-    textField: 'label',
-    multiple: true,
-    data: deviceTypeMap,
-    value: deviceTypeMap[0].value,
-    onChange: function (newValue, oldValue) {
-      $(this).combobox('hidePanel');
-      if (newValue.length) {
-        table.datagrid('load');
-      } else {
-        $(this).combobox('setValue', oldValue);
-      }
+  initCheckboxList(deviceTypeMap, $('#firmwareFilter'), 'filterDeviceType', true);
+  $('#firmwareFilter').on('change', '[name="filterDeviceType"]', function (e) {
+    const $this = $(this);
+    console.log($this);
+    const res = getCheckDeviceType($('#firmwareFilter'), 'filterDeviceType');
+    if (!res) {
+      $this[0].checked = true;
+      return false;
     }
+    table.datagrid('load');
   });
+  // $('#firmwareFilter').combobox({
+  //   width: calculateWH(100),
+  //   panelHeight: calculateWH(150),
+  //   editable: false,
+  //   valueField: 'value',
+  //   textField: 'label',
+  //   multiple: true,
+  //   data: deviceTypeMap,
+  //   value: deviceTypeMap[0].value,
+  //   onChange: function (newValue, oldValue) {
+  //     $(this).combobox('hidePanel');
+  //     if (newValue.length) {
+  //       table.datagrid('load');
+  //     } else {
+  //       $(this).combobox('setValue', oldValue);
+  //     }
+  //   }
+  // });
   // table
   const datagrid = new InitDataGrid(table, {
     // method: 'GET',
@@ -93,7 +105,7 @@ export function initFirmwareTable () {
           return formatSize(value);
         }
       },
-      { field: 'addBy', title: $.i18n.prop('MESS_Add_By') },
+      { field: 'updaterName', title: $.i18n.prop('MESS_Add_By') },
       {
         field: 'description',
         title: $.i18n.prop('MESS_Description'),
@@ -128,14 +140,14 @@ export function initFirmwareTable () {
         align: 'center',
         title: $.i18n.prop('MESS_Operation'),
         formatter: function (value, row, index) {
-          let expire = '';
-          if (row.status === 1) {
-            expire = `<span class="c-icon icon-time operate" title="${$.i18n.prop('MESS_Firmware_EditExpireDate')}" data-operate="expire" data-index=${index}></span>`;
+          let expireClass = '';
+          if (row.status === 2) {
+            expireClass = 'disable';
           }
           return `<p class="operation-tool">
                     <span class="c-icon icon-edit operate" title="${$.i18n.prop('MESS_Firmware_Edit')}" data-operate="edit" data-index=${index}></span>
                     <a href="${row.firmwarePath}" download="${row.firmwareVersion}" class="c-icon icon-download operate" title="${$.i18n.prop('MESS_Firmware_Download')}" data-operate="download" data-index=${index}></a>
-                    ${expire}
+                    <span class="c-icon icon-expired operate ${expireClass}" title="${$.i18n.prop('MESS_Firmware_EditExpireDate')}" data-operate="expire" data-index=${index}></span>
                   </p>`;
         }
       }
@@ -180,7 +192,6 @@ export function initFirmwareTable () {
     ],
     confirmFn: expireDialogConfirmFn
   });
-  // initExpireDialog(table, expireConfirmFn);
   // init dialog Stage and Status dropdown menu
   initDialogCombox(stageMap, $('#FWFormStage'));
   // initDialogCombox(statusMap, $('#FWFormStatus'), 400, 60);
@@ -218,6 +229,14 @@ function initFirmwareVList () {
   });
 }
 
+function getCheckDeviceType (scope, name) {
+  const deviceTypeArr = [];
+  scope.find('[name="' + name + '"]:checked').each(function () {
+    deviceTypeArr.push($(this).val());
+  });
+  return deviceTypeArr.join(',');
+}
+
 // initial firmware Dialog
 
 function initDialogCombox (data, ele, width = 400, height = 80) {
@@ -238,35 +257,6 @@ function initDialogCombox (data, ele, width = 400, height = 80) {
       value: dataMap[0].value
     });
   }
-}
-
-function initExpireDialog (table, confirmFn, other) {
-  const dialog = $('#firmwareExpireDialog');
-  const opts = Object.assign({}, {
-    title: $.i18n.prop('MESS_Confirm'),
-    width: calculateWH(300),
-    height: calculateWH(150),
-    closed: true,
-    cache: false,
-    modal: true,
-    buttons: [
-      {
-        text: 'Ok',
-        iconCls: 'icon-ok',
-        handler: function () {
-          confirmFn && confirmFn(table, dialog);
-        }
-      },
-      {
-        text: 'Cancel',
-        iconCls: 'icon-no',
-        handler: function () {
-          dialog.dialog('close');
-        }
-      }
-    ]
-  }, other);
-  dialog.dialog(opts);
 }
 
 function dialogBeforeOpen (table, dialog) {
@@ -394,10 +384,6 @@ function dialogClose (table, dialog) {
   };
 }
 
-function expireConfirmFn (table, dialog) {
-
-}
-
 function loadData (params, success, error) {
   const { page, rows } = params;
   const tab = $('.firmware-tab');
@@ -423,6 +409,9 @@ function addOperateHandle (tablePanel, table) {
       // }
       $('#firmwareDialog').data({ row: row, target: this.className }).dialog('open');
     } else if (type === 'expire') {
+      if ($this.hasClass('disable')) {
+        return false;
+      }
       $('#firmwareExpireDialog').data({ row: row }).dialog('open');
     }
   });

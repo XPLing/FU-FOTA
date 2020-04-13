@@ -12,6 +12,7 @@ import { store } from 'src/module/fota/common';
 import { getDeviceType } from 'src/assets/api/index';
 
 let systemLanguage = 0;
+
 $(function () {
   init();
   loadProperties(systemLanguage);

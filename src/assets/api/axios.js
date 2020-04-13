@@ -97,7 +97,7 @@ class Axios {
       console.log(err.message);
       let msg = err.response.data;
       if (Object.prototype.toString.apply(err.response.data).indexOf('Object') !== -1) {
-        msg = err.response.data.error || err.response.data.message;
+        msg = err.response.data.errorMessage || err.response.data.error || err.response.data.message;
       }
       var errRes = {
         code: err.response ? err.response.status : err.response,

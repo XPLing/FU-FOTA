@@ -35,9 +35,17 @@ export function getInitParams (scope) {
   const searchBox = scope.find('.search-box');
   const deviceType = searchBox.find('.search-filter');
   const data = deserialization(serialization(searchBox));
+  if (searchBox.hasClass('firmware-filter-form')) {
+    const deviceTypeArr = [];
+    deviceType.find('[name="filterDeviceType"]:checked').each(function () {
+      deviceTypeArr.push($(this).val());
+    });
+    data.deviceType = deviceTypeArr.join(',');
+  } else {
+    data.deviceType = deviceType.combobox('getValues').join(',');
+  }
   console.log('serialize');
   console.log(data);
-  data.deviceType = deviceType.combobox('getValues').join(',');
   return data;
 }
 
@@ -87,14 +95,18 @@ export function getDeviceType () {
   return false;
 }
 
-export function initCheckboxList (data, ele, name) {
+export function initCheckboxList (data, ele, name, defaultSelect, defaultVal = 0) {
   if (!data) {
     return false;
   }
   let dom = '';
-  data.forEach(val => {
+  data.forEach((val, index) => {
+    let select = '';
+    if (defaultSelect && index === defaultVal) {
+      select = 'checked';
+    }
     dom += '<label>' +
-      '<input type="checkbox" name="' + name + '" value="' + val.value + '" />' +
+      '<input ' + select + ' type="checkbox" name="' + name + '" value="' + val.value + '" />' +
       val.label +
       '</label>';
   });
