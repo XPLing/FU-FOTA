@@ -56,7 +56,8 @@ exports.htmlPlugins = function () {
       chunks: chunks,
       // chunksSortMode: 'manual', //手动
       data: {
-        processEnv: process.env.NODE_ENV
+        processEnv: process.env.NODE_ENV,
+        BASE_URL: config.build.assetsPublicPath
       },
       minify: {
         removeComments: true

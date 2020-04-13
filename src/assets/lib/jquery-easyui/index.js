@@ -15,25 +15,13 @@ $.fn.datagrid.defaults.view = $.extend({}, $.fn.datagrid.defaults.view, {
     if (target) {
       if ($(target).datagrid('getColumnOption', 'checkbox')) {
         if (rowData.status === 0) {
-          $div.find('[field="checkbox"] input[type="checkbox"]').css('opacity', 0.3).each(function () {
+          $div.find('[field="checkbox"] input[type="checkbox"]').addClass('ignore-checkbox').attr('disabled', true).css('opacity', 0.3).each(function () {
             $(this).checked = false;
           });
         }
       }
     }
     return $div.html();
-  }
-});
-var originCheckAll = $.fn.datagrid.methods.checkAll;
-
-$.fn.datagrid.methods = $.extend({}, $.fn.datagrid.methods, {
-  checkAll: function (...arg) {
-    console.log(...arg);
-    // var res = originCheckAll.call(originView, ...arg);
-    // console.log(...arg);
-    // var _817 = $.data(_815, 'datagrid');
-    // var opts = _817.options;
-    // var rows = opts.finder.getRows(_815);
   }
 });
 

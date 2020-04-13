@@ -34,8 +34,8 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     open: config.dev.autoOpenBrowser,
     openPage: config.dev.openPage,
     overlay: config.dev.errorOverlay
-      ? { warnings: true, errors: true }
-      : false,
+             ? { warnings: true, errors: true }
+             : false,
     publicPath: config.dev.assetsPublicPath,
     proxy: config.dev.proxyTable,
     quiet: true, // necessary for FriendlyErrorsPlugin
@@ -45,7 +45,8 @@ const devWebpackConfig = merge(baseWebpackConfig, {
   },
   plugins: [
     new webpack.DefinePlugin({
-      'process.env': require('../config/dev.env')
+      'process.env': require('../config/dev.env'),
+      'BASE_URL': JSON.stringify(config.dev.assetsPublicPath)
     }),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NamedModulesPlugin(), // HMR shows correct file names in console on update.
@@ -83,8 +84,8 @@ module.exports = new Promise((resolve, reject) => {
           messages: [`Your application is running here: http://${devWebpackConfig.devServer.host}:${port}`],
         },
         onErrors: config.dev.notifyOnErrors
-          ? utils.createNotifierCallback()
-          : undefined
+                  ? utils.createNotifierCallback()
+                  : undefined
       }));
 
       resolve(devWebpackConfig);

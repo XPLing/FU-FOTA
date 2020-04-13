@@ -12,8 +12,8 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 const env = process.env.NODE_ENV === 'production_testing'
-  ? require('../config/prod.test.env')
-  : require('../config/prod.env');
+            ? require('../config/prod.test.env')
+            : require('../config/prod.env');
 const isPro = process.env.NODE_ENV === 'production';
 var entrise = [];
 // Object.keys(baseWebpackConfig.entry).forEach(function (name) {
@@ -53,8 +53,8 @@ const webpackConfig = merge(baseWebpackConfig, {
         assetNameRegExp: /\.css$/g,
         cssProcessor: require('cssnano'),
         cssProcessorOptions: config.build.productionSourceMap
-          ? { safe: true, map: { inline: false } }
-          : { safe: true }
+                             ? { safe: true, map: { inline: false } }
+                             : { safe: true }
       })
     ],
     splitChunks: {
@@ -86,7 +86,8 @@ const webpackConfig = merge(baseWebpackConfig, {
     new CleanWebpackPlugin(),
     // http://vuejs.github.io/vue-loader/en/workflow/production.html
     new webpack.DefinePlugin({
-      'process.env': require('../config/prod.env')
+      'process.env': require('../config/prod.env'),
+      'BASE_URL': JSON.stringify(config.build.assetsPublicPath)
     }),
 
     // extract css into its own file

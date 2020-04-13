@@ -18,21 +18,9 @@ import { getFotaList, getFirmwareVersionList, upgradeFota } from 'src/assets/api
 
 let deviceTypeMap;
 let fwVersion = true;
-var originCheckAll = $.fn.datagrid.methods.checkAll;
 
-$.fn.datagrid.methods = $.extend({}, $.fn.datagrid.methods, {
-  checkAll: function (...arg) {
-    console.log(...arg);
-    // var res = originCheckAll.call(originView, ...arg);
-    // console.log(...arg);
-    // var _817 = $.data(_815, 'datagrid');
-    // var opts = _817.options;
-    // var rows = opts.finder.getRows(_815);
-  }
-});
 export function initFOTATable () {
   deviceTypeMap = getDeviceType();
-  console.log($.fn.datagrid.methods);
   // initSelectOptions(deviceTypeMap, $('#FTAFormDeviceType'), true);
   const table = $('#FOTATable'), search = $('#FOTASearch'), tab = $('.FOTA-tab');
   $('#FOTAFilter').combobox({
@@ -57,7 +45,7 @@ export function initFOTATable () {
     // method: 'GET',
     pagination: true,
     toolbar: '#FOTATabTool',
-    selectOnCheck: false,
+    selectOnCheck: true,
     fitColumns: true,
     columns: [[
       { field: 'checkbox', checkbox: true },
@@ -118,6 +106,12 @@ export function initFOTATable () {
       if (rowData.status === 0 || !fwVersion) {
         $(this).datagrid('unselectRow', rowIndex);
       }
+    },
+    onCheckAll: function (rowIndex, rows) {
+      const ignoreCheckbox = table.datagrid('getPanel').panel('body').find('.datagrid-view').find('.ignore-checkbox');
+      ignoreCheckbox.each(function () {
+        $(this).prop('checked', false);
+      });
     },
     loader: function (params, success, error) {
       loadData(params, success, error);
