@@ -32,16 +32,7 @@ export function initFirmwareTable () {
   initCheckboxList(deviceTypeMap, $('#FWFormDeviceType'), 'deviceType');
   // device type filter
   initCheckboxList(deviceTypeMap, $('#firmwareFilter'), 'filterDeviceType', true);
-  $('#firmwareFilter').on('change', '[name="filterDeviceType"]', function (e) {
-    const $this = $(this);
-    console.log($this);
-    const res = getCheckDeviceType($('#firmwareFilter'), 'filterDeviceType');
-    if (!res) {
-      $this[0].checked = true;
-      return false;
-    }
-    table.datagrid('load');
-  });
+  initFilterView(table);
   // $('#firmwareFilter').combobox({
   //   width: calculateWH(100),
   //   panelHeight: calculateWH(150),
@@ -101,6 +92,7 @@ export function initFirmwareTable () {
       {
         field: 'fileSize',
         title: $.i18n.prop('MESS_File_Size'),
+        align: 'right',
         formatter: function (value, row, index) {
           return formatSize(value);
         }
@@ -146,7 +138,7 @@ export function initFirmwareTable () {
           }
           return `<p class="operation-tool">
                     <span class="c-icon icon-edit operate" title="${$.i18n.prop('MESS_Firmware_Edit')}" data-operate="edit" data-index=${index}></span>
-                    <a href="${row.firmwarePath}" download="${row.firmwareVersion}" class="c-icon icon-download operate" title="${$.i18n.prop('MESS_Firmware_Download')}" data-operate="download" data-index=${index}></a>
+                    <a target="_blank" href="${row.firmwarePath}" download="${row.firmwareVersion}" class="c-icon icon-download operate" title="${$.i18n.prop('MESS_Firmware_Download')}" data-operate="download" data-index=${index}></a>
                     <span class="c-icon icon-expired operate ${expireClass}" title="${$.i18n.prop('MESS_Firmware_EditExpireDate')}" data-operate="expire" data-index=${index}></span>
                   </p>`;
         }
@@ -229,12 +221,76 @@ function initFirmwareVList () {
   });
 }
 
+function initFilterView (table) {
+  const viewer = $('#firmwareFilterView');
+  const checkWrapper = viewer.closest('.c-mul-select');
+  const optsWrapper = checkWrapper.find('.select-opts');
+  let str = '';
+  deviceTypeMap.forEach((val, index) => {
+    let className = 'item';
+    if (index === 0) {
+      className += ' active';
+      checkWrapper.find('.data-ele').val(val.value);
+    }
+    str += `<li class="${className}" data-val="${val.value}">${val.label}</li>`;
+  });
+  viewer.html(str);
+
+  // checkbox handle
+  optsWrapper.find('.select-opts-cont').on('change', '[name="filterDeviceType"]', function (e) {
+    const $this = $(this);
+    const res = getCheckDeviceType($('#firmwareFilter'), 'filterDeviceType').join(',');
+    if (!res) {
+      $this[0].checked = true;
+      return false;
+    }
+  });
+  // add select btn handle
+  viewer.closest('.select-view').find('.select-btn').on('click', function () {
+    optsWrapper.show();
+  });
+  optsWrapper.find('.btn[data-operate]').on('click', function () {
+    const $this = $(this);
+    const type = $this.data('operate');
+    switch (type) {
+      case 'submit':
+        mulCheckSubmit(table);
+        break;
+      case 'cancel':
+        break;
+    }
+    optsWrapper.hide();
+  });
+}
+
+function mulCheckSubmit (table) {
+  const optsCont = $('#firmwareFilter');
+  const checkWrapper = optsCont.closest('.c-mul-select');
+  const viewer = checkWrapper.find('.select-view');
+  const viewerCont = viewer.find('li');
+  const res = getCheckDeviceType(optsCont, 'filterDeviceType');
+  if (res && res.length) {
+    viewerCont.removeClass('active');
+    res.forEach((val) => {
+      viewerCont.each(function () {
+        const item = $(this);
+        const data = item.data('val');
+        if (data == val) {
+          item.addClass('active');
+        }
+      });
+    });
+    checkWrapper.find('.data-ele').val(res.join(','));
+    table.datagrid('load');
+  }
+}
+
 function getCheckDeviceType (scope, name) {
   const deviceTypeArr = [];
   scope.find('[name="' + name + '"]:checked').each(function () {
     deviceTypeArr.push($(this).val());
   });
-  return deviceTypeArr.join(',');
+  return deviceTypeArr;
 }
 
 // initial firmware Dialog

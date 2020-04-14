@@ -36,11 +36,11 @@ export function getInitParams (scope) {
   const deviceType = searchBox.find('.search-filter');
   const data = deserialization(serialization(searchBox));
   if (searchBox.hasClass('firmware-filter-form')) {
-    const deviceTypeArr = [];
-    deviceType.find('[name="filterDeviceType"]:checked').each(function () {
-      deviceTypeArr.push($(this).val());
-    });
-    data.deviceType = deviceTypeArr.join(',');
+    // const deviceTypeArr = [];
+    // deviceType.find('[name="filterDeviceType"]:checked').each(function () {
+    //   deviceTypeArr.push($(this).val());
+    // });
+    data.deviceType = searchBox.find('.data-ele').val();
   } else {
     data.deviceType = deviceType.combobox('getValues').join(',');
   }

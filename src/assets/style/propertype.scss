@@ -63,7 +63,8 @@
   line-height: 1;
   vertical-align: -.25em;
   overflow: hidden;
-  &:after{
+
+  &:after {
     display: block;
     white-space: pre-wrap;
     content: '...\A..\A.';
@@ -71,6 +72,125 @@
   }
 }
 
+.c-mul-select {
+  position: relative;
 
+  .btn {
+    @include w(60);
+    @include h(25);
+    @include lh(25);
+  }
+
+  .select-view {
+    display: flex;
+
+    .cont {
+      display: flex;
+
+      .item {
+        position: relative;
+        min-width: formatVal(50, rem);
+        padding: formatVal(5, rem) formatVal(8, rem);
+        border: 1px solid $color-gray-ded;
+        border-left: 0;
+        text-align: center;
+        background-color: $whiteColor;
+
+        &:first-child {
+          border-left: 1px solid $color-gray-ded;
+        }
+
+        & + .item {
+
+        }
+
+        &::before {
+          position: absolute;
+          z-index: 2;
+          left: 0;
+          top: 0;
+          display: none;
+          content: "\e615";
+          color: $color-auxiliary-65a;
+          @include fs(14);
+          font-family: 'c-icon' !important;
+          speak: none;
+          font-style: normal;
+          font-weight: normal;
+          font-variant: normal;
+          text-transform: none;
+          line-height: 1;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+
+        &::after {
+          display: none;
+          position: absolute;
+          content: '';
+          top: -50%;
+          bottom: -50%;
+          left: 0;
+          width: 1px;
+          transform: scale(0.5);
+          background-color: $color-auxiliary-65a;
+        }
+
+        &.active {
+          border-color: $color-auxiliary-65a;
+          color: $color-auxiliary-65a;
+
+          &::before, &::after {
+            display: block;
+          }
+        }
+      }
+    }
+
+    .btn {
+      margin-left: formatVal(10, rem);
+    }
+  }
+
+  .select-opts {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    background-color: $whiteColor;
+    padding: formatVal(10, rem) formatVal(15, rem);
+    box-shadow: 0 0 2px currentColor;
+
+    .cont {
+      display: flex;
+      margin-bottom: formatVal(15, rem);
+
+      label {
+        display: flex;
+        align-items: flex-end;
+
+        input {
+          margin-right: formatVal(3, rem);
+        }
+
+        & + label {
+          margin-left: formatVal(8, rem);
+        }
+      }
+    }
+
+    .btn-box {
+      text-align: center;
+
+      .btn {
+        & + .btn {
+          margin-left: formatVal(10, rem);
+        }
+      }
+    }
+  }
+
+}
 
 

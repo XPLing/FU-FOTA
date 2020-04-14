@@ -10,11 +10,11 @@
   height: 28px;
   line-height: 28px;
   position: relative;
-  border: 1px solid #95B8E7;
+  border: 1px solid $easyui-border-input;
   background-color: #fff;
 
   &.validatebox-invalid {
-    border-color: #ffa8a8;
+    border-color: $easyui-border-input-error;
     background-color: #fff3f3;
   }
 }
@@ -67,21 +67,9 @@
         margin-bottom: formatVal(10, rem);
 
         .field-cont {
-          display: flex;
+          flex: 0 0 auto;
         }
 
-        label {
-          display: flex;
-          align-items: flex-end;
-
-          input {
-            margin-right: formatVal(3, rem);
-          }
-
-          & + label {
-            margin-left: formatVal(8, rem);
-          }
-        }
       }
     }
   }
@@ -98,9 +86,21 @@
 }
 
 .operation-box {
-  @include h(40);
+  @include h(45);
   display: flex;
   align-items: center;
+}
+
+.firmware-tab {
+  .operation-box {
+    border-bottom: 1px solid $color-gray-e9;
+  }
+}
+
+.FOTA-tab {
+  .operation-box {
+    border-top: 1px solid $color-gray-e9;
+  }
 }
 
 .c-tab {
@@ -127,9 +127,15 @@
     max-width: 70%;
 
     &.fw-dialog-deviceType {
+      display: flex;
+      flex-flow: wrap;
+      align-items: center;
+      margin: formatVal(-5, rem);
+
       label {
         display: flex;
         align-items: center;
+        margin: formatVal(5, rem);
 
         input {
           margin-right: 3px;
@@ -161,19 +167,9 @@
   font-weight: bold;
 }
 
-.fw-dialog-deviceType {
-  display: flex;
-  flex-flow: wrap;
-  align-items: center;
-  margin: formatVal(-5, rem);
-
-  label {
-    display: flex;
-    align-items: center;
-    margin: formatVal(5, rem);
-  }
-}
 
 .expire-tip {
   padding: formatVal(20, rem);
 }
+
+

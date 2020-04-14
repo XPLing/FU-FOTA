@@ -15,7 +15,7 @@ $.fn.datagrid.defaults.view = $.extend({}, $.fn.datagrid.defaults.view, {
     if (target) {
       if ($(target).datagrid('getColumnOption', 'checkbox')) {
         if (rowData.status === 0) {
-          $div.find('[field="checkbox"] input[type="checkbox"]').addClass('ignore-checkbox').attr('disabled', true).css('opacity', 0.3).each(function () {
+          $div.find('[field="checkbox"] input[type="checkbox"]').addClass('ignore-checkbox').attr('disabled', true).css('opacity', 0.5).each(function () {
             $(this).checked = false;
           });
         }

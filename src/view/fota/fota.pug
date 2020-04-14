@@ -47,19 +47,28 @@ body
                         input.field-cont.datePicker(id="FTAFormExpireDate", name="commandExpireDate")
         div.c-tab.firmware-tab(title="Firmware")
             #firmwareTabTool
+                .operation-box
+                    a.easyui-linkbutton.firmware-new(data-options="iconCls:'icon-add'")
+                        span(data-trans-text="MESS_New")
                 form.search-box.c-form.firmware-filter-form(data-starget='firmwareSearch', data-ftarget='firmwareFilter')
                     .c-form-group.filter
                         label.field-name(data-trans-text="MESS_Device_Type")
-                        .field-cont.search-filter#firmwareFilter
+                        .field-cont.c-mul-select.search-filter
+                            .select-view
+                                ul.cont#firmwareFilterView
+                                a.btn.easyui-linkbutton.select-btn(data-trans-text="MESS_Select")
+                            .select-opts
+                                .cont.select-opts-cont#firmwareFilter
+                                .btn-box
+                                    a.btn.easyui-linkbutton(data-trans-text="MESS_Ok", data-operate="submit")
+                                    a.btn.easyui-linkbutton(data-trans-text="MESS_Cancel", data-operate="cancel")
+                            input.data-ele(type="hidden")
                     .c-form-group
                         label
                             span.field-name(data-trans-text="MESS_Firmware_Version")
                             input.easyui-textbox.field-cont(data-trans-placeholder="MESS_Input_Value", name="firmwareVersion", data-options="width:'350px'")
                     .c-form-group
                         a.easyui-linkbutton.submit-btn#firmwareSearch(data-options="iconCls:'icon-search'")
-                .operation-box
-                    a.easyui-linkbutton.firmware-new(data-options="iconCls:'icon-add'")
-                        span(data-trans-text="MESS_New")
             table.firmware-table#firmwareTable
             .firmware-dialog#firmwareDialog
                 form.c-form.firmware-form#firmwareForm
