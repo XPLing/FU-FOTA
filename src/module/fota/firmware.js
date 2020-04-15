@@ -136,9 +136,10 @@ export function initFirmwareTable () {
           if (row.status === 2) {
             expireClass = 'disable';
           }
+          const url = `/operator/admin/fota/firmware/${row.firmwareId}/download`;
           return `<p class="operation-tool">
                     <span class="c-icon icon-edit operate" title="${$.i18n.prop('MESS_Firmware_Edit')}" data-operate="edit" data-index=${index}></span>
-                    <a target="_blank" href="${row.firmwarePath}" download="${row.firmwareVersion}" class="c-icon icon-download operate" title="${$.i18n.prop('MESS_Firmware_Download')}" data-operate="download" data-index=${index}></a>
+                    <a href="${url}" download="${row.firmwareVersion}" class="c-icon icon-download operate" title="${$.i18n.prop('MESS_Firmware_Download')}" data-operate="download" data-index=${index}></a>
                     <span class="c-icon icon-expired operate ${expireClass}" title="${$.i18n.prop('MESS_Firmware_EditExpireDate')}" data-operate="expire" data-index=${index}></span>
                   </p>`;
         }

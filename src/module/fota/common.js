@@ -184,3 +184,5 @@ export function initDialog (dialog, table, other) {
   }, other);
   dialog.dialog(opts);
 }
+
+

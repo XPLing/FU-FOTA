@@ -352,3 +352,14 @@ export function formatSize (bytes) {
   var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
   return (bytes / Math.pow(1024, i)).toFixed(1) + ' ' + sizes[i];
 };
+
+export function download (url) {
+  let iframe = document.createElement('iframe');
+  iframe.style.display = 'none';
+  iframe.src = url;
+  document.body.appendChild(iframe);
+  iframe.onload = function () {
+    document.body.removeChild(iframe);
+    iframe = null;
+  };
+}
