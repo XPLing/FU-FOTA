@@ -33,6 +33,7 @@
   display: flex;
   align-items: center;
   padding: 0;
+  flex-flow: wrap;
 
   .c-form-group {
     margin: 0;
@@ -45,6 +46,10 @@
 
     .field-name {
       text-align: left;
+    }
+
+    .field-cont {
+      max-width: 100%;
     }
   }
 
@@ -67,7 +72,14 @@
         margin-bottom: formatVal(10, rem);
 
         .field-cont {
-          flex: 0 0 auto;
+          .select-view .cont {
+            flex-flow: wrap;
+            @media screen and (max-width: 1280px) {
+              .item {
+                min-width: formatVal(80, rem);
+              }
+            }
+          }
         }
 
       }

@@ -55,8 +55,8 @@ export function initFOTATable () {
         field: 'license',
         title: $.i18n.prop('MESS_Vehicle#Asset#'),
         formatter: function (value, row, index) {
-          const vals = value ? ellipsis(value, 15) : 'N/A';
-          return `<span title="${vals}"></span>`;
+          const vals = value ? ellipsis(value, 40) : 'N/A';
+          return `<span title="${vals}">${vals}</span>`;
         }
       },
       {
@@ -70,6 +70,20 @@ export function initFOTATable () {
       { field: 'upgradingFirmware', title: $.i18n.prop('MESS_UpgradingFW') },
       { field: 'currentFirmware', title: $.i18n.prop('MESS_Current_Firmware') },
       { field: 'operatorName', align: 'center', title: $.i18n.prop('MESS_OperatedBy') },
+      {
+        field: 'operateTime',
+        title: $.i18n.prop('MESS_Operate_Time'),
+        formatter: function (value, row, index) {
+          return `<span class="">${formatDate(value, 'yyyy-MM-dd hh:mm:ss')}</span>`;
+        }
+      },
+      {
+        field: 'startTime',
+        title: $.i18n.prop('MESS_Start_Time'),
+        formatter: function (value, row, index) {
+          return `<span class="">${formatDate(value, 'yyyy-MM-dd hh:mm:ss')}</span>`;
+        }
+      },
       {
         field: 'lastUpdateTime',
         title: $.i18n.prop('MESS_Last_Update'),
@@ -135,7 +149,8 @@ export function initFOTATable () {
   });
   // init calendar
   $('#FOTAUpgradeDialog').find('.datePicker').datetimebox({
-    current: new Date(),
+    // current: new Date(new Date().getTime() + 5 * 24 * 360000),
+    value: formatDate(new Date().getTime() + 120 * 3600000, 'MM/dd/yyyy hh:mm:ss'),
     editable: false
     // parser: function (data) {
     //   console.log(data);
@@ -277,11 +292,10 @@ function dialogConfirmFn (table, dialog) {
       }
     }
     res = row.map(val => {
-      const { devId, deviceType, upgradingFirmware, commandExpireDate, currentFirmware } = Object.assign({}, val, data);
+      const { devId, deviceType, commandExpireDate, currentFirmware } = Object.assign({}, val, data);
       return {
         devId,
         deviceType,
-        upgradingFirmware,
         currentFirmware,
         firmwareId,
         commandExpireDate: new Date(commandExpireDate).getTime()
