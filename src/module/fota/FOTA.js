@@ -20,6 +20,7 @@ let deviceTypeMap;
 let fwVersion = true;
 
 export function initFOTATable () {
+  const statusMap = ['Inited', 'Notification', 'In Progress', 'Canceled', 'Done', 'Failed'];
   deviceTypeMap = getDeviceType();
   // initSelectOptions(deviceTypeMap, $('#FTAFormDeviceType'), true);
   const table = $('#FOTATable'), search = $('#FOTASearch'), tab = $('.FOTA-tab');
@@ -64,7 +65,13 @@ export function initFOTATable () {
         align: 'center',
         title: $.i18n.prop('MESS_Status'),
         formatter: function (value, row, index) {
-          return `<span>${value === '100%' ? 'Done' : (value || '')}</span>`;
+          let res = value;
+          if (res) {
+            res = res === '100%' ? 'Done' : res;
+          } else {
+            res = statusMap[row.status] || '';
+          }
+          return `<span>${res}</span>`;
         }
       },
       { field: 'upgradingFirmware', title: $.i18n.prop('MESS_UpgradingFW') },

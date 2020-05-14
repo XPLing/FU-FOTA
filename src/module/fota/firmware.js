@@ -58,7 +58,14 @@ export function initFirmwareTable () {
     pagination: true,
     toolbar: '#firmwareTabTool',
     columns: [[
-      { field: 'firmwareVersion', title: $.i18n.prop('MESS_Firmware_Version') },
+      {
+        width: '20%',
+        field: 'firmwareVersion',
+        title: $.i18n.prop('MESS_Firmware_Version'),
+        formatter: function (value, row, index) {
+          return '<span title="' + value + '">' + value + '</span>';
+        }
+      },
       {
         field: 'deviceTypes',
         title: $.i18n.prop('MESS_Device_Type'),
@@ -99,6 +106,7 @@ export function initFirmwareTable () {
       },
       { field: 'updaterName', title: $.i18n.prop('MESS_Add_By') },
       {
+        width: '20%',
         field: 'description',
         title: $.i18n.prop('MESS_Description'),
         formatter: function (value, row, index) {

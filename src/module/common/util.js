@@ -217,11 +217,11 @@ function successTip (opts) {
 
 export function deserialization (data) {
   const res = {};
-  data = decodeURIComponent(data).split('&');
+  data = data.split('&');
   if (data && data.length) {
     data.forEach(val => {
       const item = val.split('=');
-      res[item[0]] = item[1];
+      res[decodeURIComponent(item[0])] = decodeURIComponent(item[1]);
     });
     return res;
   } else {
