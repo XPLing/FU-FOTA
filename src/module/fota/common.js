@@ -44,8 +44,6 @@ export function getInitParams (scope) {
   } else {
     data.deviceType = deviceType.combobox('getValues').join(',');
   }
-  console.log('serialize');
-  console.log(data);
   return data;
 }
 

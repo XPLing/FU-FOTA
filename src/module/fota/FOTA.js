@@ -148,7 +148,7 @@ export function initFOTATable () {
   const tablePanel = datagrid.tablePanel;
   addOperateHandle(tablePanel, table);
   initDialog($('#FOTAUpgradeDialog'), table, {
-    title: $.i18n.prop('MESS_Create_Firmware'),
+    title: $.i18n.prop('MESS_Upgrade'),
     onClose: dialogClose,
     onBeforeOpen: dialogBeforeOpen,
     onOpen: dialogOpen,

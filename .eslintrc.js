@@ -13,7 +13,8 @@ module.exports = {
     'plupload': true,
     'Qiniu': true,
     '_': true,
-    '$': true
+    '$': true,
+    'jQuery': true
   },
   env: {
     es6: true,

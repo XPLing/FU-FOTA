@@ -6,7 +6,6 @@ import {
   deserialization,
   serialization,
   formatDate,
-  toTXT,
   formatSize
 } from '../common/util';
 import {
@@ -110,7 +109,7 @@ export function initFirmwareTable () {
         field: 'description',
         title: $.i18n.prop('MESS_Description'),
         formatter: function (value, row, index) {
-          return toTXT(value);
+          return value;
         }
       },
       {

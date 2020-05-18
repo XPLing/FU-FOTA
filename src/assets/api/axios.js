@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { toTXT } from 'src/module/common/util';
 // axios.defaults.withCredentials = true // 让ajax携带cookie
 const whiteList = '';
 export const pending = []; //  声明一个数组用于存储每个ajax请求的取消函数和ajax标识
@@ -6,7 +7,21 @@ const CancelToken = axios.CancelToken;
 
 const DEFULT = {
   whiteList: '',
-  pending: []
+  pending: [],
+  transformResponse: [function (data, header) {
+    if (data) {
+      data = toTXT(data);
+      try {
+        data = JSON.parse(data);
+      } catch (e) {
+        console.log('json parse error');
+        console.log(e);
+        return data;
+      }
+
+    }
+    return data || '';
+  }]
 };
 
 export const removePending = (config, obj) => {
@@ -24,8 +39,8 @@ class Axios {
     this.config = DEFULT;
   }
 
-  init (config, dConf) {
-    Object.assign({}, this.config, dConf);
+  init (config) {
+    config = Object.assign({}, this.config, config);
     const instance = axios.create(config);
     //  添加请求拦截器
     instance.interceptors.request.use(config => {
@@ -37,6 +52,12 @@ class Axios {
           config.other.cancelSource.cancel = c;
         }
       });
+      // if (config.data) {
+      //   config.data = JSON.parse(toTXT(JSON.stringify(config.data)));
+      // }
+      // if (config.params) {
+      //   config.params = JSON.parse(toTXT(JSON.stringify(config.params)));
+      // }
       return config;
     }, error => {
       return Promise.reject(error);

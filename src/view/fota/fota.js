@@ -6,13 +6,14 @@ import 'easyui';
 import '1i8n';
 import 'assets/style/common';
 import './fota.scss';
-import { loading, finish, loadProperties, mesgTip } from 'src/module/common/util';
+import 'src/module/plugin/easyui';
+import { loading, finish, loadProperties, toHTML } from 'src/module/common/util';
 import { store } from 'src/module/fota/common';
 // import { initFirmwareTable } from 'src/module/fota/firmware';
 import { getDeviceType } from 'src/assets/api/index';
 
 let systemLanguage = 0;
-
+console.log($.fn.validatebox.defaults.rules);
 $(function () {
   init();
   loadProperties(systemLanguage);
@@ -35,6 +36,69 @@ function init () {
   if (OPTESTLan) {
     systemLanguage = (~~OPTESTLan) - 1;
   }
+  // rest jquery.fn.val
+  var rreturn = /\r/g;
+  $.fn.extend({
+    val: function (value) {
+      var hooks, ret, isFunction,
+        elem = this[0];
+
+      if (!arguments.length) {
+        if (elem) {
+          hooks = $.valHooks[elem.type] ||
+            $.valHooks[elem.nodeName.toLowerCase()];
+
+          if (
+            hooks &&
+            'get' in hooks &&
+            (ret = hooks.get(elem, 'value')) !== undefined
+          ) {
+            return ret;
+          }
+
+          ret = elem.value;
+
+          return typeof ret === 'string' ? ret.replace(rreturn, '') : ret == null ? '' : ret;
+        }
+
+        return;
+      }
+
+      isFunction = $.isFunction(value);
+
+      return this.each(function (i) {
+        var val;
+
+        if (this.nodeType !== 1) {
+          return;
+        }
+
+        if (isFunction) {
+          val = value.call(this, i, $(this).val());
+        } else {
+          val = value;
+        }
+
+        // Treat null/undefined as ""; convert numbers to string
+        if (val == null) {
+          val = '';
+        } else if (typeof val === 'number') {
+          val += '';
+        } else if ($.isArray(val)) {
+          val = $.map(val, function (value) {
+            return value == null ? '' : value + '';
+          });
+        }
+
+        hooks = $.valHooks[this.type] || $.valHooks[this.nodeName.toLowerCase()];
+
+        // If set returns undefined, fall back to normal setting
+        if (!hooks || !('set' in hooks) || hooks.set(this, val, 'value') === undefined) {
+          this.value = toHTML(val);
+        }
+      });
+    }
+  });
 }
 
 function initTabs () {

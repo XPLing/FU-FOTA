@@ -281,11 +281,12 @@ export function ellipsis (str, limit) {
 
 // HTML 转字符串
 export function toTXT (str) {
-  if (!str) {
-    return '';
+  if (!str || typeof str !== 'string') {
+    return str;
   }
+  // var RexStr = /\<|\>|\/|\\|\&|　| /g;
   // eslint-disable-next-line no-useless-escape
-  var RexStr = /\<|\>|\"|\'|\&|　| /g;
+  var RexStr = /\<|\>|/g;
   str = str.replace(RexStr,
     function (MatchStr) {
       switch (MatchStr) {
@@ -299,10 +300,47 @@ export function toTXT (str) {
           return '&#39;';
         case '&':
           return '&amp;';
+        case '/':
+          return '&frasl;';
         case ' ':
           return '&ensp;';
         case '　':
           return '&emsp;';
+        default:
+          return '';
+      }
+    }
+  );
+  return str;
+}
+
+// HTML 转字符串
+export function toHTML (str) {
+  if (!str || typeof str !== 'string') {
+    return str;
+  }
+  // var RexStr = /\<|\>|\/|\\|\&|　| /g;
+  // eslint-disable-next-line no-useless-escape
+  var RexStr = /&lt;|&gt;|&amp;|&ensp;|&emsp;|/g;
+  str = str.replace(RexStr,
+    function (MatchStr) {
+      switch (MatchStr) {
+        case '&lt;':
+          return '<';
+        case '&gt;':
+          return '>';
+        case '&quot;':
+          return '"';
+        case '&#39;':
+          return '\'';
+        case '&amp;':
+          return '&';
+        case '&ensp;':
+          return ' ';
+        case '&emsp;':
+          return '　';
+        case '&frasl;':
+          return '/';
         default:
           return '';
       }

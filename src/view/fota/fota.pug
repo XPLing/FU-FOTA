@@ -80,7 +80,7 @@ body
                         .field-cont.fw-dialog-deviceType#FWFormDeviceType
                     .c-form-group
                         label.field-name(for="FWFormFirmwareVersion", data-trans-text="MESS_Firmware_Version")
-                        input.field-cont.c-input-text.easyui-validatebox(id="FWFormFirmwareVersion", name="firmwareVersion", data-options="required:true")
+                        input.field-cont.c-input-text.easyui-validatebox(id="FWFormFirmwareVersion", name="firmwareVersion", data-options="required:true,validType:'fwVersion'")
                     .c-form-group
                         label.field-name(for="FWFormStage", data-trans-text="MESS_Firmware_Stage")
                         select.field-cont#FWFormStage(name="firmwareStage")
