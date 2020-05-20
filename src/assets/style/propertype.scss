@@ -18,9 +18,16 @@
 .c-form {
   .c-form-group {
     display: flex;
+    flex-flow: wrap;
 
     & + .c-form-group {
-      margin-top: formatVal(20, rem);
+      margin-top: formatVal(10, rem);
+    }
+
+    .form-item {
+      display: flex;
+
+      margin: formatVal(5, rem);
     }
 
     .field-name {

@@ -7,24 +7,48 @@ body
         div.c-tab.FOTA-tab(title="FOTA")
             #FOTATabTool
                 form.search-box.c-form.FOTA-filter-from(data-starget='FOTASearch', data-ftarget='FOTAFilter')
-                    .c-form-group.filter
-                        label.field-name(data-trans-text="MESS_Device_Type")
-                        input.field-cont.search-filter#FOTAFilter(name="deviceType")
                     .c-form-group
-                        label
-                            span.field-name(data-trans-text="MESS_Company_Name")
-                            input.easyui-textbox.field-cont(data-trans-placeholder="MESS_Input_Value", name="companyName")
+                        .form-item
+                            label.field-name(data-trans-text="MESS_Device_Type")
+                            input.field-cont.search-filter#FOTAFilter(name="deviceType")
+                        .form-item
+                            label.field-name(data-trans-text="MESS_Status")
+                            .field-cont.c-mul-select.search-filter#FTFilterStatus
+                                .select-view
+                                    ul.cont
+                                    a.btn.easyui-linkbutton.select-btn(data-trans-text="MESS_Select")
+                                .select-opts
+                                    .cont.select-opts-cont
+                                    .btn-box
+                                        a.btn.easyui-linkbutton(data-trans-text="MESS_Ok", data-operate="submit")
+                                        a.btn.easyui-linkbutton(data-trans-text="MESS_Cancel", data-operate="cancel")
+                                input.data-ele(type="hidden", name="status")
                     .c-form-group
-                        label
-                            span.field-name(data-trans-text="MESS_Firmware_Version")
-                            input.easyui-textbox.field-cont(data-trans-placeholder="MESS_Input_Value", name="firmwareVersion", data-options="width:'350px'")
-                    .c-form-group
-                        a.easyui-linkbutton.submit-btn#FOTASearch(data-options="iconCls:'icon-search'")
+                        .form-item
+                            label
+                                span.field-name(data-trans-text="MESS_Company_Name")
+                                input.easyui-textbox.field-cont(data-trans-placeholder="MESS_Input_Value", name="companyName", data-options="width:'100px'")
+                        .form-item
+                            label
+                                span.field-name(data-trans-text="MESS_Device_ID")
+                                input.easyui-textbox.field-cont(data-trans-placeholder="MESS_Input_Value", name="devId", data-options="width:'100px'")
+                        .form-item
+                            label
+                                span.field-name(data-trans-text="MESS_Current_Firmware")
+                                input.easyui-textbox.field-cont(data-trans-placeholder="MESS_Input_Value", name="currentFirmware", data-options="width:'200px'")
+
+                        .form-item
+                            label
+                                span.field-name(data-trans-text="MESS_UpgradingFW")
+                                input.easyui-textbox.field-cont(data-trans-placeholder="MESS_Input_Value", name="upgradingFirmware", data-options="width:'200px'")
+                        .form-item.form-operate
+                            a.easyui-linkbutton.btn.submit-btn#FOTASearch(data-options="iconCls:'icon-search'", title="search")
+                            a.easyui-linkbutton.btn.reset-btn#FOTASearchClean(data-options="iconCls:'icon-undo'", title="reset")
                 .operation-box
                     a.easyui-linkbutton.batch-upgrade(data-options="iconCls:'icon-reload'")
                         span(data-trans-text="MESS_Batch_Upgrade")
             table.easyui-datagrid.FOTA-table#FOTATable
-            #FOTAUpgradeDialog.FOTA-dialog
+            .dialog-wrapper.FOTA-dialog#FOTAUpgradeDialog
                 form.c-form.FOTA-upgrade-form#FOTAUpgradeForm
                     .c-form-group
                         label.field-name(for="FTAFormDevId", data-trans-text="MESS_Device_ID")
@@ -32,6 +56,10 @@ body
                     .c-form-group
                         label.field-name(for="FTAFormVehicleOrAsset", data-trans-text="MESS_Vehicle#Asset#")
                         input.field-cont.c-input-text(id="FTAFormVehicleOrAsset", disabled, name="license")
+                    .c-form-group
+                        .field-name
+                            span(data-trans-text="MESS_FOTA_Protocol")
+                        input.field-cont.c-input-text(name="fotaProtocol", disabled)
                     .c-form-group(data-scope="batch")
                         label.field-name(for="FTAFormDeviceTypeVal", data-trans-text="MESS_Device_Type")
                         input.field-cont.c-input-text(id="FTAFormDeviceTypeVal", disabled, name="deviceTypeVal")
@@ -51,9 +79,9 @@ body
                     a.easyui-linkbutton.firmware-new(data-options="iconCls:'icon-add'")
                         span(data-trans-text="MESS_New")
                 form.search-box.c-form.firmware-filter-form(data-starget='firmwareSearch', data-ftarget='firmwareFilter')
-                    .c-form-group.filter
+                    .c-form-group.block
                         label.field-name(data-trans-text="MESS_Device_Type")
-                        .field-cont.c-mul-select.search-filter
+                        .field-cont.c-mul-select.search-filter#firmwareFilterDeviceType
                             .select-view
                                 ul.cont#firmwareFilterView
                                 a.btn.easyui-linkbutton.select-btn(data-trans-text="MESS_Select")
@@ -62,15 +90,41 @@ body
                                 .btn-box
                                     a.btn.easyui-linkbutton(data-trans-text="MESS_Ok", data-operate="submit")
                                     a.btn.easyui-linkbutton(data-trans-text="MESS_Cancel", data-operate="cancel")
-                            input.data-ele(type="hidden")
+                            input.data-ele(type="hidden", name="deviceType")
                     .c-form-group
-                        label
-                            span.field-name(data-trans-text="MESS_Firmware_Version")
-                            input.easyui-textbox.field-cont(data-trans-placeholder="MESS_Input_Value", name="firmwareVersion", data-options="width:'350px'")
-                    .c-form-group
-                        a.easyui-linkbutton.submit-btn#firmwareSearch(data-options="iconCls:'icon-search'")
+                        .form-item
+                            label.field-name(data-trans-text="MESS_FOTA_Protocol")
+                            .field-cont.c-mul-select.search-filter#firmwareFilterProtocol
+                                .select-view
+                                    ul.cont
+                                    a.btn.easyui-linkbutton.select-btn(data-trans-text="MESS_Select")
+                                .select-opts
+                                    .cont.select-opts-cont
+                                    .btn-box
+                                        a.btn.easyui-linkbutton(data-trans-text="MESS_Ok", data-operate="submit")
+                                        a.btn.easyui-linkbutton(data-trans-text="MESS_Cancel", data-operate="cancel")
+                                input.data-ele(type="hidden", name="protocol")
+                        .form-item
+                            label.field-name(data-trans-text="MESS_Status")
+                            .field-cont.c-mul-select.search-filter#firmwareFilterStatus
+                                .select-view
+                                    ul.cont
+                                    a.btn.easyui-linkbutton.select-btn(data-trans-text="MESS_Select")
+                                .select-opts
+                                    .cont.select-opts-cont
+                                    .btn-box
+                                        a.btn.easyui-linkbutton(data-trans-text="MESS_Ok", data-operate="submit")
+                                        a.btn.easyui-linkbutton(data-trans-text="MESS_Cancel", data-operate="cancel")
+                                input.data-ele(type="hidden", name="status")
+                        .form-item
+                            label
+                                span.field-name(data-trans-text="MESS_Firmware_Version")
+                                input.easyui-textbox.field-cont(data-trans-placeholder="MESS_Input_Value", name="firmwareVersion", data-options="width:'350px'")
+                        .form-item.form-operate
+                            a.easyui-linkbutton.btn.submit-btn#firmwareSearch(data-options="iconCls:'icon-search'", title="search")
+                            a.easyui-linkbutton.btn.reset-btn#firmwareSearchClean(data-options="iconCls:'icon-undo'", title="reset")
             table.firmware-table#firmwareTable
-            .firmware-dialog#firmwareDialog
+            .dialog-wrapper.firmware-dialog#firmwareDialog
                 form.c-form.firmware-form#firmwareForm
                     .c-form-group
                         label.field-name(for="FWFormFirmware", data-trans-text="MESS_FirmwareLocation")
@@ -78,6 +132,10 @@ body
                     .c-form-group
                         label.field-name(data-trans-text="MESS_Device_Type")
                         .field-cont.fw-dialog-deviceType#FWFormDeviceType
+                    .c-form-group(data-scope="edit")
+                        .field-name
+                            span(data-trans-text="MESS_FOTA_Protocol")
+                        input.field-cont.c-input-text(name="fotaProtocol", disabled)
                     .c-form-group
                         label.field-name(for="FWFormFirmwareVersion", data-trans-text="MESS_Firmware_Version")
                         input.field-cont.c-input-text.easyui-validatebox(id="FWFormFirmwareVersion", name="firmwareVersion", data-options="required:true,validType:'fwVersion'")
@@ -86,7 +144,7 @@ body
                         select.field-cont#FWFormStage(name="firmwareStage")
                     .c-form-group
                         label.field-name(for="releaseNotes", data-trans-text="MESS_Release_Notes")
-                        textarea.field-cont.c-input-text.c-input-textarea.easyui-validatebox(id="releaseNotes", name="description", data-options="required:true")
+                        textarea.field-cont.c-input-text.c-input-textarea.easyui-validatebox(id="releaseNotes", name="description", data-options="required:true, validType: 'maxLength[200]'")
                     .c-form-group(data-scope="edit")
                         .field-name
                             span(data-trans-text="MESS_File_Size")

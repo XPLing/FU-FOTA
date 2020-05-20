@@ -11,6 +11,7 @@ import {
 import {
   getDeviceType,
   InitDataGrid,
+  filterViewBase,
   initCheckboxList, getInitParams, initSearchBox, initDialog
 } from './common';
 import {
@@ -21,17 +22,41 @@ import {
 } from 'src/assets/api/index';
 
 let deviceTypeMap;
-const statusMap = ['Active', 'Expired'];
+const statusMap = [
+  {
+    label: 'Active',
+    value: 1
+  },
+  {
+    label: 'Expired',
+    value: 2
+  }
+];
 const stageMap = ['Beta', 'Release', 'Specific'];
+const protocolMap = [
+  {
+    label: 'HTTP',
+    value: 'HTTP'
+  },
+  {
+    label: 'FTP',
+    value: 'FTP'
+  },
+  {
+    label: 'TCP',
+    value: 'TCP'
+  }
+];
 
 export function initFirmwareTable () {
+  // get device type list
   deviceTypeMap = getDeviceType();
-
   const table = $('#firmwareTable'), search = $('#firmwareSearch'), tab = $('.firmware-tab');
+  // init deviceType for dialog of the new and edit
   initCheckboxList(deviceTypeMap, $('#FWFormDeviceType'), 'deviceType');
-  // device type filter
-  initCheckboxList(deviceTypeMap, $('#firmwareFilter'), 'filterDeviceType', true);
+  // init search filter
   initFilterView(table);
+
   // $('#firmwareFilter').combobox({
   //   width: calculateWH(100),
   //   panelHeight: calculateWH(150),
@@ -51,6 +76,7 @@ export function initFirmwareTable () {
   //   }
   // });
   // table
+  // init table
   const datagrid = new InitDataGrid(table, {
     // method: 'GET',
     singleSelect: true,
@@ -88,6 +114,14 @@ export function initFirmwareTable () {
         }
       },
       {
+        field: 'fotaProtocol',
+        align: 'center',
+        title: $.i18n.prop('MESS_FOTA_Protocol'),
+        formatter: function (value, row, index) {
+          return value;
+        }
+      },
+      {
         field: 'firmwareStage',
         align: 'center',
         title: $.i18n.prop('MESS_Firmware_Stage'),
@@ -117,7 +151,8 @@ export function initFirmwareTable () {
         align: 'center',
         title: $.i18n.prop('MESS_Status'),
         formatter: function (value, row, index) {
-          return `<span class="${value === 1 ? 'txt-success' : 'txt-danger'}">${statusMap[--value]}</span>`;
+          const status = statusMap.filter(res => res.value === value)[0];
+          return `<span class="${value === 1 ? 'txt-success' : 'txt-danger'}">${status && status.label}</span>`;
         }
       },
       {
@@ -163,8 +198,10 @@ export function initFirmwareTable () {
   });
   // search box
   initSearchBox(table, $('#firmwareTabTool'));
+  // init table header tool
   addToolHandle(table);
   const tablePanel = datagrid.tablePanel;
+  // init table operation
   if (tablePanel[0]) {
     addOperateHandle(tablePanel, table);
   }
@@ -230,75 +267,34 @@ function initFirmwareVList () {
 }
 
 function initFilterView (table) {
-  const viewer = $('#firmwareFilterView');
-  const checkWrapper = viewer.closest('.c-mul-select');
-  const optsWrapper = checkWrapper.find('.select-opts');
-  let str = '';
-  deviceTypeMap.forEach((val, index) => {
-    let className = 'item';
-    if (index === 0) {
-      className += ' active';
-      checkWrapper.find('.data-ele').val(val.value);
-    }
-    str += `<li class="${className}" data-val="${val.value}">${val.label}</li>`;
-  });
-  viewer.html(str);
-
-  // checkbox handle
-  optsWrapper.find('.select-opts-cont').on('change', '[name="filterDeviceType"]', function (e) {
-    const $this = $(this);
-    const res = getCheckDeviceType($('#firmwareFilter'), 'filterDeviceType').join(',');
-    if (!res) {
-      $this[0].checked = true;
-      return false;
-    }
-  });
-  // add select btn handle
-  viewer.closest('.select-view').find('.select-btn').on('click', function () {
-    optsWrapper.show();
-  });
-  optsWrapper.find('.btn[data-operate]').on('click', function () {
-    const $this = $(this);
-    const type = $this.data('operate');
-    switch (type) {
-      case 'submit':
-        mulCheckSubmit(table);
-        break;
-      case 'cancel':
-        break;
-    }
-    optsWrapper.hide();
-  });
-}
-
-function mulCheckSubmit (table) {
-  const optsCont = $('#firmwareFilter');
-  const checkWrapper = optsCont.closest('.c-mul-select');
-  const viewer = checkWrapper.find('.select-view');
-  const viewerCont = viewer.find('li');
-  const res = getCheckDeviceType(optsCont, 'filterDeviceType');
-  if (res && res.length) {
-    viewerCont.removeClass('active');
-    res.forEach((val) => {
-      viewerCont.each(function () {
-        const item = $(this);
-        const data = item.data('val');
-        if (data == val) {
-          item.addClass('active');
-        }
-      });
+  // deviceType
+  filterViewBase($('#firmwareFilterDeviceType'),
+    {
+      dataMap: deviceTypeMap,
+      fieldName: 'filterDeviceType',
+      defaultVal: ['1'],
+      onSumbit: () => {
+        table.datagrid('load');
+      }
     });
-    checkWrapper.find('.data-ele').val(res.join(','));
-    table.datagrid('load');
-  }
-}
-
-function getCheckDeviceType (scope, name) {
-  const deviceTypeArr = [];
-  scope.find('[name="' + name + '"]:checked').each(function () {
-    deviceTypeArr.push($(this).val());
+  // status
+  filterViewBase($('#firmwareFilterStatus'), {
+    dataMap: statusMap,
+    fieldName: 'filterStatus',
+    allowNull: true,
+    onSumbit: () => {
+      table.datagrid('load');
+    }
   });
-  return deviceTypeArr;
+  // Protocol
+  filterViewBase($('#firmwareFilterProtocol'), {
+    dataMap: protocolMap,
+    fieldName: 'filterProtocol',
+    allowNull: true,
+    onSumbit: () => {
+      table.datagrid('load');
+    }
+  });
 }
 
 // initial firmware Dialog
@@ -451,8 +447,14 @@ function dialogClose (table, dialog) {
 function loadData (params, success, error) {
   const { page, rows } = params;
   const tab = $('.firmware-tab');
-  const { deviceType, firmwareVersion } = getInitParams(tab);
-  return getFirmwareList(deviceType, { firmwareVersion, offset: page, limit: rows }).then(res => {
+  const { deviceType, firmwareVersion, protocol, status } = getInitParams(tab);
+  return getFirmwareList(deviceType, {
+    firmwareVersion,
+    fotaProtocols: protocol,
+    statuses: status,
+    offset: page,
+    limit: rows
+  }).then(res => {
     success(res);
   }).catch(e => {
     console.log(e);
@@ -522,7 +524,8 @@ function initFirmwareInfo (row, dialog) {
     Object.keys(row).forEach(val => {
       let displayVal = row[val];
       if (val === 'status') {
-        displayVal = statusMap[row[val] - 1];
+        const status = statusMap.filter(res => res.value === row[val])[0];
+        displayVal = status && status.label;
       }
       dialog.find(`[name="${val}"]`).val(displayVal);
       const combox = dialog.find(`[comboname="${val}"]`);

@@ -12,15 +12,42 @@ import {
   InitDataGrid,
   getDeviceType,
   getInitParams,
+  filterViewBase,
   initSearchBox, initDialog
 } from './common';
 import { getFotaList, getFirmwareVersionList, upgradeFota } from 'src/assets/api/index';
 
 let deviceTypeMap;
 let fwVersion = true;
+const statusMap = [
+  {
+    label: 'Inited',
+    value: 0
+  },
+  {
+    label: 'Notification',
+    value: 1
+  },
+  {
+    label: 'In Progress',
+    value: 2
+  },
+  {
+    label: 'Canceled',
+    value: 3
+  },
+  {
+    label: 'Done',
+    value: 4
+  },
+  {
+    label: 'Failed',
+    value: 4
+  }
+];
 
 export function initFOTATable () {
-  const statusMap = ['Inited', 'Notification', 'In Progress', 'Canceled', 'Done', 'Failed'];
+  // get device
   deviceTypeMap = getDeviceType();
   // initSelectOptions(deviceTypeMap, $('#FTAFormDeviceType'), true);
   const table = $('#FOTATable'), search = $('#FOTASearch'), tab = $('.FOTA-tab');
@@ -42,6 +69,12 @@ export function initFOTATable () {
       table.datagrid('load');
     }
   });
+  // init table search box handle
+  initSearchBox(table, $('#FOTATabTool'));
+
+  // init search filter
+  initFilterView(table);
+  // init table
   const datagrid = new InitDataGrid(table, {
     // method: 'GET',
     pagination: true,
@@ -61,6 +94,19 @@ export function initFOTATable () {
         }
       },
       {
+        field: 'currentFirmware',
+        title: $.i18n.prop('MESS_Current_Firmware')
+      },
+      { field: 'upgradingFirmware', title: $.i18n.prop('MESS_UpgradingFW') },
+      {
+        field: 'fotaProtocol',
+        align: 'center',
+        title: $.i18n.prop('MESS_FOTA_Protocol'),
+        formatter: function (value, row, index) {
+          return value;
+        }
+      },
+      {
         field: 'percentage',
         align: 'center',
         title: $.i18n.prop('MESS_Status'),
@@ -69,13 +115,12 @@ export function initFOTATable () {
           if (res) {
             res = res === '100%' ? 'Done' : res;
           } else {
-            res = statusMap[row.status] || '';
+            const status = statusMap.filter(res => res.value === value)[0];
+            res = (status && status.label) || '';
           }
           return `<span>${res}</span>`;
         }
       },
-      { field: 'upgradingFirmware', title: $.i18n.prop('MESS_UpgradingFW') },
-      { field: 'currentFirmware', title: $.i18n.prop('MESS_Current_Firmware') },
       { field: 'operatorName', align: 'center', title: $.i18n.prop('MESS_OperatedBy') },
       {
         field: 'operateTime',
@@ -94,6 +139,13 @@ export function initFOTATable () {
       {
         field: 'lastUpdateTime',
         title: $.i18n.prop('MESS_Last_Update'),
+        formatter: function (value, row, index) {
+          return `<span class="">${formatDate(value, 'yyyy-MM-dd hh:mm:ss')}</span>`;
+        }
+      },
+      {
+        field: 'expireTime',
+        title: $.i18n.prop('MESS_Expire_Time'),
         formatter: function (value, row, index) {
           return `<span class="">${formatDate(value, 'yyyy-MM-dd hh:mm:ss')}</span>`;
         }
@@ -143,8 +195,11 @@ export function initFOTATable () {
       // $(this).datagrid('loadData', []);
     }
   });
-  initSearchBox(table, $('#FOTATabTool'));
+
+  // init table header tool handle
   addToolHandle(table);
+
+  // init table operations handle
   const tablePanel = datagrid.tablePanel;
   addOperateHandle(tablePanel, table);
   initDialog($('#FOTAUpgradeDialog'), table, {
@@ -154,6 +209,7 @@ export function initFOTATable () {
     onOpen: dialogOpen,
     confirmFn: dialogConfirmFn
   });
+
   // init calendar
   $('#FOTAUpgradeDialog').find('.datePicker').datetimebox({
     // current: new Date(new Date().getTime() + 5 * 24 * 360000),
@@ -349,8 +405,16 @@ function dialogClose (table, dialog) {
 function loadData (params, success, error) {
   const { page, rows } = params;
   const tab = $('.FOTA-tab');
-  const { deviceType, firmwareVersion, companyName } = getInitParams(tab);
-  return getFotaList(deviceType, { firmwareVersion, companyName, offset: page, limit: rows }).then(res => {
+  const { deviceType, companyName, devId, upgradingFirmware, currentFirmware, status } = getInitParams(tab);
+  return getFotaList(deviceType, {
+    devId,
+    currentFirmware,
+    upgradingFirmware,
+    companyName,
+    offset: page,
+    limit: rows,
+    statuses: status
+  }).then(res => {
     success(res);
   }).catch(e => {
     console.log(e);
@@ -400,5 +464,18 @@ function initDialogFirmwareVList (row, _this) {
 
 function upgrade (params) {
   return upgradeFota(params);
+}
+
+function initFilterView (table) {
+  // status
+  filterViewBase($('#FTFilterStatus'), {
+    dataMap: statusMap,
+    fieldName: 'filterStatus',
+    defaultVal: [],
+    allowNull: true,
+    onSumbit: () => {
+      table.datagrid('load');
+    }
+  });
 }
 

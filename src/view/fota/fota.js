@@ -13,7 +13,6 @@ import { store } from 'src/module/fota/common';
 import { getDeviceType } from 'src/assets/api/index';
 
 let systemLanguage = 0;
-console.log($.fn.validatebox.defaults.rules);
 $(function () {
   init();
   loadProperties(systemLanguage);
