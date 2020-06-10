@@ -9,7 +9,8 @@
     "unit": "jest --config test/unit/jest.conf.js --coverage",
     "test": "cross-env NODE_ENV=production_testing node build/build.js",
     "lint": "eslint --ext .js,.vue src test/unit",
-    "build": "cross-env NODE_ENV=production node build/build.js"
+    "build": "cross-env NODE_ENV=production node build/build.js",
+    "deploy": "aws s3 sync ./dist/ s3://html.dev.fleetup.cc/static/manage/web/ --delete --acl public-read"
   },
   "author": "",
   "license": "ISC",

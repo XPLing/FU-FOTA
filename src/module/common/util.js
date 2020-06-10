@@ -429,3 +429,9 @@ export function uuid (len, radix) {
 
   return uuid.join('');
 }
+
+// 表单输入框 监听input变化delay处理 -- 未使用
+export function inputChangeDelay (timer, time, cb) {
+  clearTimeout(timer);
+  return setTimeout(cb, time);
+}

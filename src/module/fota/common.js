@@ -381,6 +381,7 @@ function resetSearch (form) {
     const textbox = target.siblings('.textbox.combo');
     let defaultText = data.filter(item => item.value == defaultVal)[0];
     defaultText = defaultText ? defaultText.label : '';
+    target.textbox('setValue', defaultText);
     textbox.find('.textbox-text').val(defaultText);
     textbox.find('[name="' + fieldName + '"]').val(defaultVal);
   });

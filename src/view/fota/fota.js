@@ -9,7 +9,6 @@ import './fota.scss';
 import 'src/module/plugin/easyui';
 import { loading, finish, loadProperties, toHTML } from 'src/module/common/util';
 import { store } from 'src/module/fota/common';
-// import { initFirmwareTable } from 'src/module/fota/firmware';
 import { getDeviceType } from 'src/assets/api/index';
 
 let systemLanguage = 0;

@@ -42,7 +42,7 @@ const statusMap = [
   },
   {
     label: 'Failed',
-    value: 4
+    value: 5
   }
 ];
 
@@ -115,8 +115,8 @@ export function initFOTATable () {
           if (res) {
             res = res === '100%' ? 'Done' : res;
           } else {
-            const status = statusMap.filter(res => res.value === value)[0];
-            res = (status && status.label) || '';
+            const status = statusMap.filter(res => res.value === row.status)[0];
+            res = (status && status.label) || (status != null ? 'In Progress' : '');
           }
           return `<span>${res}</span>`;
         }
@@ -144,7 +144,7 @@ export function initFOTATable () {
         }
       },
       {
-        field: 'expireTime',
+        field: 'commandExpireDate',
         title: $.i18n.prop('MESS_Expire_Time'),
         formatter: function (value, row, index) {
           return `<span class="">${formatDate(value, 'yyyy-MM-dd hh:mm:ss')}</span>`;
@@ -157,7 +157,7 @@ export function initFOTATable () {
         formatter: function (value, row, index) {
           if (fwVersion) {
             let operationStatus = 'disable';
-            if (row.status !== 0) {
+            if (row.status > 3 || row.status == null) {
               operationStatus = '';
             }
             return `<span class="c-icon icon-reload operate ${operationStatus}" title="${$.i18n.prop('MESS_Upgrade')}" data-operate="upgrading" data-index=${index}></span>`;
@@ -370,14 +370,14 @@ function dialogConfirmFn (table, dialog) {
         loading();
         upgrade(res).then(() => {
           mesgTip('success', {
-            msg: 'Upgrade FOTA successful'
+            msg: 'Save successful!'
           });
           dialog.dialog('close');
           table.datagrid('load');
         }).catch(e => {
           console.log(e);
           mesgTip('error', {
-            msg: e.message || 'Upgrade FOTA failed'
+            msg: e.message || 'Save failed!'
           });
         }).finally(() => {
           finish();

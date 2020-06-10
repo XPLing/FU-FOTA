@@ -47,6 +47,18 @@ const protocolMap = [
     value: 'TCP'
   }
 ];
+let inputDelayTimer = null; // timer for delay FirmwareLocation field change
+const inputDelayTime = 800; // time for delay FirmwareLocation field change
+const firmwareTypeMap = [
+  {
+    rules: ['JT701TL', 'JT701TLORA'],
+    type: '11'
+  },
+  {
+    rules: ['JT701'],
+    type: '15'
+  }
+];
 
 export function initFirmwareTable () {
   // get device type list
@@ -467,6 +479,8 @@ function addOperateHandle (tablePanel, table) {
     const $this = $(this), type = $this.data('operate');
     const row = table.datagrid('getRows')[$this.data('index')];
     if (type === 'edit') {
+      // remove change event on the Firmware Location of the Firmware dialog
+      removeEventOnFirmwareLocation();
       // if (!$('#FWFormFirmware').siblings('.combo')[0]) {
       //   initFirmwareVList().then(res => {
       //     $('#firmwareDialog').data({ row: row, target: this.className }).dialog('open');
@@ -486,6 +500,9 @@ function addOperateHandle (tablePanel, table) {
 function addToolHandle (table) {
   $('.firmware-new').on('click', function () {
     const $this = $(this);
+    // add change event on the Firmware Location of the Firmware dialog
+    removeEventOnFirmwareLocation();
+    addEventOnFirmwareLocation();
     // if (!$('#FWFormFirmware').siblings('.combo')[0]) {
     //   initFirmwareVList().then(res => {
     //     $('#firmwareDialog').data({ target: $this.attr('class') }).dialog('open');
@@ -550,4 +567,49 @@ function initFirmwareInfo (row, dialog) {
   }
 }
 
+function addEventOnFirmwareLocation () {
+  const filed = $('#FWFormFirmware');
+  filed.on('input', firmwareLocationChangeDelay);
+}
 
+function removeEventOnFirmwareLocation () {
+  const filed = $('#FWFormFirmware');
+  filed.off('input', firmwareLocationChangeDelay);
+}
+
+function firmwareLocationChangeDelay (e) {
+  clearTimeout(inputDelayTimer);
+  inputDelayTimer = setTimeout(() => {
+    firmwareLocationChange(e);
+  }, inputDelayTime);
+}
+
+function firmwareLocationChange (e) {
+  const value = e.target.value;
+  const deviceType = $('#FWFormDeviceType');
+  const res = getFirmwareTypeByFWLocation(value);
+  deviceType.find('input:checked').prop('checked', false);
+  const checkboxList = deviceType.find('input[type=checkbox]');
+  if (res.length) {
+    res.forEach(item => {
+      deviceType.find('input[type=checkbox][value="' + item.type + '"]').prop('checked', true);
+    });
+  }
+}
+
+function getFirmwareTypeByFWLocation (value) {
+  if (!value) {
+    return false;
+  }
+  value = value.split('/');
+  value = value[value.length - 1];
+  const res = firmwareTypeMap.filter(item => {
+    const rules = item.rules.map(item => item + '_').join('|');
+    const reg = new RegExp(rules, 'g');
+    const match = value.match(reg);
+    if (match) {
+      return item.type;
+    }
+  });
+  return res;
+}
