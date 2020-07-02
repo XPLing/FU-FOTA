@@ -34,7 +34,7 @@ function init () {
   if (OPTESTLan) {
     systemLanguage = (~~OPTESTLan) - 1;
   }
-  // rest jquery.fn.val
+  // rest jquery.fn.val for XXS
   var rreturn = /\r/g;
   $.fn.extend({
     val: function (value) {

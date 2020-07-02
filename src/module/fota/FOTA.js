@@ -18,7 +18,7 @@ import {
 import { getFotaList, getFirmwareVersionList, upgradeFota } from 'src/assets/api/index';
 
 let deviceTypeMap;
-let fwVersion = true;
+let fwVersion = true; // to get Firmware version list, the value is true if return not null
 const statusMap = [
   {
     label: 'Inited',
@@ -112,11 +112,11 @@ export function initFOTATable () {
         title: $.i18n.prop('MESS_Status'),
         formatter: function (value, row, index) {
           let res = value;
-          if (res) {
-            res = res === '100%' ? 'Done' : res;
+          if (row.status == 2) {
+            res = value;
           } else {
             const status = statusMap.filter(res => res.value === row.status)[0];
-            res = (status && status.label) || (status != null ? 'In Progress' : '');
+            res = (status && status.label) || '';
           }
           return `<span>${res}</span>`;
         }
@@ -166,17 +166,17 @@ export function initFOTATable () {
       }
     ]],
     rowStyler: function (index, row) {
-      if (fwVersion && row.status === 0) {
+      if (fwVersion && !checkStatusCanUp(row.status)) {
         return 'background-color:#eee;';
       }
     },
     onCheck: function (rowIndex, rowData) {
-      if (rowData.status === 0 || !fwVersion) {
+      if (!checkStatusCanUp(rowData.status) || !fwVersion) {
         $(this).datagrid('uncheckRow', rowIndex);
       }
     },
     onSelect: function (rowIndex, rowData) {
-      if (rowData.status === 0 || !fwVersion) {
+      if (!checkStatusCanUp(rowData.status) || !fwVersion) {
         $(this).datagrid('unselectRow', rowIndex);
       }
     },
@@ -479,3 +479,7 @@ function initFilterView (table) {
   });
 }
 
+function checkStatusCanUp (status) {
+  // check the device whether can to upgrade currently
+  return ![0, 1, 2].includes(status);
+}
