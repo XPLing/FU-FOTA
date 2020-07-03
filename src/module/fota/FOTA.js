@@ -211,7 +211,7 @@ export function initFOTATable () {
   });
 
   // init calendar
-  $('#FOTAUpgradeDialog').find('.datePicker').datetimebox({
+  const datetimebox = $('#FOTAUpgradeDialog').find('.datePicker').datetimebox({
     // current: new Date(new Date().getTime() + 5 * 24 * 360000),
     value: formatDate(new Date().getTime() + 120 * 3600000, 'MM/dd/yyyy hh:mm:ss'),
     editable: false
@@ -227,6 +227,15 @@ export function initFOTATable () {
     // onSelect: function (data) {
     //   console.log(data);
     // }
+  });
+  datetimebox.datetimebox('calendar').calendar({
+    validator (date) {
+      const now = new Date();
+      if (date.getDate() === now.getDate()) {
+        return true;
+      }
+      return date > new Date();
+    }
   });
 }
 
@@ -356,6 +365,10 @@ function dialogConfirmFn (table, dialog) {
     }
     res = row.map(val => {
       const { devId, deviceType, commandExpireDate, currentFirmware } = Object.assign({}, val, data);
+      if (commandExpireDate < new Date().getTime()) {
+        $.messager.alert('Warning', $.i18n.prop('MESS_CheckMultiple_ErrorMsg'));
+        return false;
+      }
       return {
         devId,
         deviceType,
@@ -364,6 +377,11 @@ function dialogConfirmFn (table, dialog) {
         commandExpireDate: new Date(commandExpireDate).getTime()
       };
     });
+    const hasIllegalExpireDate = res.filter(item => item.commandExpireDate < new Date().getTime());
+    if (hasIllegalExpireDate.length) {
+      $.messager.alert('Warning', $.i18n.prop('MESS_IllegalExpireDate_ErrorMsg'));
+      return false;
+    }
     console.log(res);
     $.messager.confirm('Confirm', 'Are you sure to upgrade those devices?', function (r) {
       if (r) {
