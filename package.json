@@ -67,7 +67,7 @@
     "postcss-import": "^11.0.0",
     "postcss-loader": "^3.0.0",
     "postcss-sprites": "^4.2.1",
-    "pug": "^2.0.4",
+    "pug": "^3.0.1",
     "pug-html-loader": "^1.1.5",
     "sass": "^1.22.9",
     "sass-loader": "^7.1.0",
